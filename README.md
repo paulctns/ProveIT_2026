@@ -2,4 +2,4 @@
 
 Proiect pentru competiția de mâine.
 
-Colaboratori: Paul_Branch, Simone, Silviu
+Colaboratori: Paul, Simone, Silviu

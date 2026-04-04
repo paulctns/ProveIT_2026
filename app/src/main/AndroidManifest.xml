@@ -13,6 +13,24 @@
         android:theme="@style/Theme.AplicatieProveIT"
         tools:targetApi="31">
         <activity
+            android:name=".ChangePasswordActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MedicActivity"
+            android:exported="false" />
+        <activity
+            android:name=".PacientActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ScanActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SignInActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LoginActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:padding="24dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Creare Cont Nou"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="24dp"/>
+
+        <RadioGroup
+            android:id="@+id/rgTipUtilizator"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp">
+
+            <RadioButton
+                android:id="@+id/rbPacient"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sunt Pacient"
+                android:checked="true"
+                android:layout_weight="1"/>
+
+            <RadioButton
+                android:id="@+id/rbMedic"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sunt Medic"
+                android:layout_weight="1"/>
+        </RadioGroup>
+
+        <EditText
+            android:id="@+id/etEmail"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="Email Personal"
+            android:inputType="textEmailAddress"
+            android:background="#EEEEEE"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:endIconMode="password_toggle"
+            app:hintEnabled="false">
+            <EditText
+                android:id="@+id/etPassword"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:hint="Parolă"
+                android:inputType="textPassword"
+                android:background="#EEEEEE"
+                android:padding="12dp"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#CCCCCC" android:layout_marginBottom="16dp"/>
+
+        <LinearLayout
+            android:id="@+id/layoutDateMedicale"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Date Personale și Istoric" android:textStyle="bold" android:layout_marginBottom="8dp"/>
+
+            <EditText android:id="@+id/etCNP" android:layout_width="match_parent" android:layout_height="50dp" android:hint="CNP / Serie și Nr. Buletin" android:inputType="text" android:background="#EEEEEE" android:padding="12dp" android:layout_marginBottom="8dp"/>
+
+            <EditText
+                android:id="@+id/etVarsta"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:hint="Vârstă (ani)"
+                android:inputType="number"
+                android:background="#EEEEEE"
+                android:padding="12dp"
+                android:layout_marginBottom="8dp"/>
+
+            <EditText android:id="@+id/etGrupaSange" android:layout_width="match_parent" android:layout_height="50dp" android:hint="Grupa de Sânge (ex: A, B, O, AB)" android:background="#EEEEEE" android:padding="12dp" android:layout_marginBottom="8dp"/>
+            <EditText android:id="@+id/etAlergii" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="80dp" android:hint="Alergii cunoscute" android:gravity="top|start" android:background="#EEEEEE" android:padding="12dp" android:layout_marginBottom="8dp"/>
+            <EditText android:id="@+id/etBoli" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="80dp" android:hint="Boli Cronice / Probleme anterioare" android:gravity="top|start" android:background="#EEEEEE" android:padding="12dp" android:layout_marginBottom="8dp"/>
+            <EditText android:id="@+id/etMedicamente" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="80dp" android:hint="Medicamente luate în prezent" android:gravity="top|start" android:background="#EEEEEE" android:padding="12dp" android:layout_marginBottom="16dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layoutDateMedic"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#CCCCCC" android:layout_marginBottom="16dp"/>
+
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Date Profesionale Medic" android:textStyle="bold" android:layout_marginBottom="8dp"/>
+
+            <EditText android:id="@+id/etCodParafa" android:layout_width="match_parent" android:layout_height="50dp" android:hint="Cod Parafă" android:background="#EEEEEE" android:padding="12dp" android:layout_marginBottom="8dp"/>
+            <EditText android:id="@+id/etEmailInstitutional" android:layout_width="match_parent" android:layout_height="50dp" android:hint="Email Instituțional (@spital.ro)" android:inputType="textEmailAddress" android:background="#EEEEEE" android:padding="12dp" android:layout_marginBottom="8dp"/>
+            <EditText android:id="@+id/etIDInstitutional" android:layout_width="match_parent" android:layout_height="50dp" android:hint="ID Instituțional (Legitimație)" android:background="#EEEEEE" android:padding="12dp" android:layout_marginBottom="8dp"/>
+            <EditText android:id="@+id/etUnitateMedicala" android:layout_width="match_parent" android:layout_height="50dp" android:hint="Unitate Medicală" android:background="#EEEEEE" android:padding="12dp" android:layout_marginBottom="8dp"/>
+            <EditText android:id="@+id/etDepartament" android:layout_width="match_parent" android:layout_height="50dp" android:hint="Departament" android:background="#EEEEEE" android:padding="12dp" android:layout_marginBottom="16dp"/>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnSubmitSignIn"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="Creează Cont"
+            android:backgroundTint="#4CAF50"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="32dp"/>
+
+    </LinearLayout>
+</ScrollView>

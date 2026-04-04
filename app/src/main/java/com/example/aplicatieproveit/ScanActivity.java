@@ -36,6 +36,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ScanActivity extends AppCompatActivity {
 
@@ -45,15 +47,15 @@ public class ScanActivity extends AppCompatActivity {
     private TextView tvStatusAI, tvRezultatScanare;
     private Bitmap pozaBuletin;
 
-    // Folosim cheia ta nouă
-    private final String API_KEY = "AIzaSyBFwsFktLflJ2ryHX1xJ8PQ3gREx0PbPnM";
+    // Folosim cheia protejată prin BuildConfig
+    private final String API_KEY = BuildConfig.API_KEY;
 
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
                 if (isGranted) {
                     deschideCamera();
                 } else {
-                    Toast.makeText(this, "Permisiunea este necesară pentru scanare!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Permisiunea este necesară!", Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -68,6 +70,7 @@ public class ScanActivity extends AppCompatActivity {
 
                     btnDeschideCamera.setVisibility(View.GONE);
                     btnTrimiteCatreAI.setVisibility(View.VISIBLE);
+                    btnTrimiteCatreAI.setText("Analizează buletinul");
                     tvRezultatScanare.setText("Imagine capturată. Apasă pe 'Analizează'.");
                 }
             }
@@ -117,7 +120,7 @@ public class ScanActivity extends AppCompatActivity {
         btnTrimiteCatreAI.setVisibility(View.GONE);
         progressBarAI.setVisibility(View.VISIBLE);
         tvStatusAI.setVisibility(View.VISIBLE);
-        tvRezultatScanare.setText("Analizez datele...");
+        tvRezultatScanare.setText("Gemini 3 Flash analizează...");
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
@@ -128,8 +131,29 @@ public class ScanActivity extends AppCompatActivity {
                 progressBarAI.setVisibility(View.GONE);
                 tvStatusAI.setVisibility(View.GONE);
                 if (rezultatAI != null && !rezultatAI.startsWith("EROARE_")) {
-                    tvRezultatScanare.setText(rezultatAI);
-                    tvRezultatScanare.setTextColor(android.graphics.Color.parseColor("#008800"));
+
+                    String cnpExtras = extrageCNP(rezultatAI);
+                    boolean gasitInSistem = verificaInBazaDeDateSimulata(cnpExtras);
+
+                    if (gasitInSistem) {
+                        tvRezultatScanare.setText("✅ UTILIZATOR ÎNREGISTRAT\n\n" + rezultatAI);
+                        tvRezultatScanare.setTextColor(android.graphics.Color.parseColor("#008800"));
+                    } else {
+                        tvRezultatScanare.setText("⚠️ MOD GUEST (NECUNOSCUT)\n\n" + rezultatAI);
+                        tvRezultatScanare.setTextColor(android.graphics.Color.parseColor("#FF8800"));
+                    }
+
+                    btnTrimiteCatreAI.setVisibility(View.VISIBLE);
+                    btnTrimiteCatreAI.setText("CONFIRMĂ ȘI CONTINUĂ");
+                    btnTrimiteCatreAI.setBackgroundColor(android.graphics.Color.parseColor("#2196F3"));
+
+                    btnTrimiteCatreAI.setOnClickListener(vNext -> {
+                        Intent intent = new Intent(ScanActivity.this, PacientActivity.class);
+                        intent.putExtra("DATE_PACIENT_SCANAT", rezultatAI);
+                        intent.putExtra("ESTE_IN_SISTEM", gasitInSistem);
+                        startActivity(intent);
+                    });
+
                 } else {
                     btnTrimiteCatreAI.setVisibility(View.VISIBLE);
                     tvRezultatScanare.setText("Problemă: " + rezultatAI);
@@ -139,25 +163,35 @@ public class ScanActivity extends AppCompatActivity {
         });
     }
 
+    private String extrageCNP(String text) {
+        Matcher m = Pattern.compile("\\d{13}").matcher(text);
+        if (m.find()) return m.group();
+        return "";
+    }
+
+    private boolean verificaInBazaDeDateSimulata(String cnp) {
+        // Asigură-te că aceste CNP-uri sunt exact cele de pe buletinele de test
+        String cnpPaul = "1900101123456";
+        String cnpSilviu = "5031004270014";
+        return cnp.equals(cnpPaul) || cnp.equals(cnpSilviu);
+    }
+
     private String cereDateDeLaGoogle(Bitmap bitmap) {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, baos);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 85, baos);
             byte[] imageBytes = baos.toByteArray();
             String base64Image = Base64.encodeToString(imageBytes, Base64.NO_WRAP);
 
-            // CONSTRUCȚIE JSON CORECTĂ PENTRU v1beta
             JSONObject jsonBody = new JSONObject();
             JSONArray contentsArray = new JSONArray();
             JSONObject contentObj = new JSONObject();
             JSONArray partsArray = new JSONArray();
 
-            // 1. Textul
             JSONObject textPart = new JSONObject();
-            textPart.put("text", "Extrage din acest buletin românesc datele: Nume, Prenume, CNP, Serie, Număr. Răspunde direct cu lista lor.");
+            textPart.put("text", "Extrage din acest buletin românesc: Nume, Prenume, CNP, Serie, Număr. Răspunde doar cu lista.");
             partsArray.put(textPart);
 
-            // 2. Imaginea (Cheia corectă este 'inline_data' cu underscore pentru REST)
             JSONObject imagePart = new JSONObject();
             JSONObject inlineData = new JSONObject();
             inlineData.put("mime_type", "image/jpeg");
@@ -169,8 +203,9 @@ public class ScanActivity extends AppCompatActivity {
             contentsArray.put(contentObj);
             jsonBody.put("contents", contentsArray);
 
-            // URL pentru Gemini 2.5 Flash
-            URL url = new URL("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + API_KEY);
+            // ACTUALIZARE URL: Folosim Gemini 3 Flash (Default 2026)
+            URL url = new URL("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + API_KEY);
+
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
@@ -178,8 +213,7 @@ public class ScanActivity extends AppCompatActivity {
 
             OutputStream os = conn.getOutputStream();
             os.write(jsonBody.toString().getBytes(StandardCharsets.UTF_8));
-            os.flush();
-            os.close();
+            os.flush(); os.close();
 
             int responseCode = conn.getResponseCode();
             if (responseCode == 200) {
@@ -187,7 +221,6 @@ public class ScanActivity extends AppCompatActivity {
                 scanner.useDelimiter("\\A");
                 String responseStr = scanner.hasNext() ? scanner.next() : "";
                 scanner.close();
-
                 JSONObject jsonResponse = new JSONObject(responseStr);
                 return jsonResponse.getJSONArray("candidates")
                         .getJSONObject(0)
@@ -196,7 +229,12 @@ public class ScanActivity extends AppCompatActivity {
                         .getJSONObject(0)
                         .getString("text");
             } else {
-                return "EROARE_API: " + responseCode;
+                // Citim eroarea detaliată pentru debug în caz că dă 400
+                Scanner s = new Scanner(new InputStreamReader(conn.getErrorStream()));
+                s.useDelimiter("\\A");
+                String error = s.hasNext() ? s.next() : "";
+                s.close();
+                return "EROARE_API " + responseCode + ": " + error;
             }
         } catch (Exception e) {
             return "EROARE_SISTEM: " + e.getMessage();

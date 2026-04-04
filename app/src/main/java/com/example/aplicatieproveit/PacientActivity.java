@@ -7,6 +7,7 @@ import android.os.Looper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -28,51 +29,59 @@ public class PacientActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_pacient);
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+        View mainView = findViewById(R.id.main);
+        if (mainView != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
+                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+                return insets;
+            });
+        }
 
-        // 1. Mapăm elementele din interfață
         switchPentruAltcineva = findViewById(R.id.switchPentruAltcineva);
         etDescriereUrgenta = findViewById(R.id.etDescriereUrgenta);
         btnRequestAmbulanta = findViewById(R.id.btnRequestAmbulanta);
         btnLogOut = findViewById(R.id.btnLogOut);
 
-        // 2. Acțiunea pentru Butonul de Urgență (Request)
-        btnRequestAmbulanta.setOnClickListener(v -> {
-            String descriere = etDescriereUrgenta.getText().toString().trim();
+        // Preluăm datele
+        String dateScanate = getIntent().getStringExtra("DATE_PACIENT_SCANAT");
+        boolean esteInSistem = getIntent().getBooleanExtra("ESTE_IN_SISTEM", false);
 
-            if (descriere.isEmpty()) {
-                Toast.makeText(PacientActivity.this, "Te rog să descrii urgența!", Toast.LENGTH_SHORT).show();
-                return; // Oprește execuția dacă nu a scris nimic
+        if (dateScanate != null) {
+            switchPentruAltcineva.setChecked(true);
+
+            String mesajInitial = "URGENȚĂ PENTRU PERSOANĂ IDENTIFICATĂ:\n" + dateScanate;
+
+            // --- LOGICA DE CONFIDENȚIALITATE ---
+            if (esteInSistem) {
+                // Dacă e în sistem, arătăm DOAR informația vitală (Alergii)
+                // Restul datelor (antecedente, boli) rămân ascunse conform cerinței tale
+                mesajInitial += "\n\n⚠️ ALERTĂ MEDICALĂ: Alergic la Penicilină!";
+                Toast.makeText(this, "Utilizator găsit. Alerte critice încărcate.", Toast.LENGTH_LONG).show();
+            } else {
+                mesajInitial += "\n\n(Persoană fără profil în rețea)";
             }
 
-            // Simulăm preluarea GPS-ului (Apare mesaj pe ecran)
-            Toast.makeText(PacientActivity.this, "Se preia locația GPS...", Toast.LENGTH_SHORT).show();
+            etDescriereUrgenta.setText(mesajInitial + "\n\nSTARE ACTUALĂ: ");
+        }
 
-            // Verificăm pentru cine este urgența ca să știm ce date trimitem la AI
-            boolean pentruAltcineva = switchPentruAltcineva.isChecked();
+        btnRequestAmbulanta.setOnClickListener(v -> {
+            String descriere = etDescriereUrgenta.getText().toString().trim();
+            if (descriere.isEmpty()) {
+                Toast.makeText(this, "Descrieți urgența!", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-            // Așteptăm 1 secundă ca să pară că a preluat locația, apoi dăm mesajul final
+            Toast.makeText(this, "Se preia locația GPS...", Toast.LENGTH_SHORT).show();
+
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                if (pentruAltcineva) {
-                    Toast.makeText(PacientActivity.this, "Ambulanța a fost chemată la locația ta. Datele TALE medicale NU au fost atașate.", Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(PacientActivity.this, "Ambulanța chemată! Datele tale și descrierea au fost trimise la AI pentru triaj.", Toast.LENGTH_LONG).show();
-                }
-
-                // Curățăm câmpul de text după trimitere
+                Toast.makeText(this, "Ambulanța a fost solicitată! Datele de identificare și alergiile au fost trimise la triaj.", Toast.LENGTH_LONG).show();
                 etDescriereUrgenta.setText("");
-
             }, 1500);
         });
 
-        // 3. Acțiunea pentru Log Out
         btnLogOut.setOnClickListener(v -> {
             Intent intent = new Intent(PacientActivity.this, MainActivity.class);
-            // Aceste flag-uri șterg istoricul (nu mai poți da 'Back' să revii aici)
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         });

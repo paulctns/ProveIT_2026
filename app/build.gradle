@@ -14,6 +14,18 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        // --- LOGICA PENTRU CITIREA CHEII DIN local.properties ---
+        def properties = new Properties()
+        properties.load(project.rootProject.file('local.properties').newDataInputStream())
+        def apiKey = properties.getProperty('GEMINI_API_KEY')
+
+        buildConfigField "String", "API_KEY", "\"${apiKey}\""
+    }
+
+    buildFeatures {
+        // Activează generarea clasei BuildConfig
+        buildConfig true
     }
 
     buildTypes {

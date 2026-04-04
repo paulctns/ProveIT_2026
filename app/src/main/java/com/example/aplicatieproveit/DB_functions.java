@@ -7,18 +7,28 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class DB_functions {
-    // private static final String IP = "192.168.132.172"; // Folosește asta pentru telefon real
-    private static final String IP = "10.0.2.2"; // Folosește asta pentru EMULATOR
+    /**
+     * Emulator (AVD): folosește mereu 10.0.2.2 — este alias către localhost-ul PC-ului tău.
+     * Telefon fizic (același Wi‑Fi cu PC): pune aici IPv4 din ipconfig (ex. 192.168.1.100), NU localhost.
+     */
+    private static final String IP = "10.0.2.2";
+
     private static final String PORT = "3306";
     private static final String DB_NAME = "healthcare_app";
-    private static final String USER = "root"; // User-ul tau MySQL
-    private static final String PASS = ""; // Parola ta (lasa gol dacă ai folosit --initialize-insecure)
 
-    private static final String URL = "jdbc:mysql://" + IP + ":" + PORT + "/" + DB_NAME + "?useSSL=false&allowPublicKeyRetrieval=true";
+    private static final String USER = "admin_app";
+    private static final String PASS = "agartha69";
 
+    private static final String URL = "jdbc:mysql://" + IP + ":" + PORT + "/" + DB_NAME
+            + "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
     private Connection getConnection() throws SQLException {
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            // Încercăm ambele variante de driver pentru siguranță
+            try {
+                Class.forName("com.mysql.cj.jdbc.Driver");
+            } catch (ClassNotFoundException e) {
+                Class.forName("com.mysql.jdbc.Driver");
+            }
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -192,6 +202,7 @@ public class DB_functions {
             stmt.setBoolean(3, isForSelf);
             stmt.setString(4, description);
             stmt.setBoolean(5, needsAmbulance);
+            stmt.setInt(6, estimatedTime);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();

@@ -47,8 +47,10 @@ public class ScanActivity extends AppCompatActivity {
     private TextView tvStatusAI, tvRezultatScanare;
     private Bitmap pozaBuletin;
 
-    // Folosim cheia protejată prin BuildConfig
     private final String API_KEY = BuildConfig.API_KEY;
+
+    // --- INSTANȚIEM BAZA DE DATE ---
+    private DB_functions db = new DB_functions();
 
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
@@ -120,37 +122,49 @@ public class ScanActivity extends AppCompatActivity {
         btnTrimiteCatreAI.setVisibility(View.GONE);
         progressBarAI.setVisibility(View.VISIBLE);
         tvStatusAI.setVisibility(View.VISIBLE);
-        tvRezultatScanare.setText("Gemini 3 Flash analizează...");
+        tvRezultatScanare.setText("Gemini analizează și caută în baza de date...");
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
 
         executor.execute(() -> {
+            // 1. Obținem datele de la AI
             String rezultatAI = cereDateDeLaGoogle(pozaBuletin);
+
+            // 2. Extragem CNP-ul din text
+            String cnpExtras = extrageCNP(rezultatAI);
+
+            // 3. Verificăm în baza de date MySQL (pe background thread)
+            boolean gasitInSistem = false;
+            if (!cnpExtras.isEmpty()) {
+                gasitInSistem = db.isCnpRegistered(cnpExtras);
+            }
+
+            // 4. Trimitem rezultatul înapoi pe UI Thread
+            final boolean finalGasitInSistem = gasitInSistem;
             handler.post(() -> {
                 progressBarAI.setVisibility(View.GONE);
                 tvStatusAI.setVisibility(View.GONE);
+
                 if (rezultatAI != null && !rezultatAI.startsWith("EROARE_")) {
 
-                    String cnpExtras = extrageCNP(rezultatAI);
-                    boolean gasitInSistem = verificaInBazaDeDateSimulata(cnpExtras);
-
-                    if (gasitInSistem) {
-                        tvRezultatScanare.setText("✅ UTILIZATOR ÎNREGISTRAT\n\n" + rezultatAI);
+                    if (finalGasitInSistem) {
+                        tvRezultatScanare.setText("✅ PACIENT GĂSIT ÎN BAZA DE DATE\n\n" + rezultatAI);
                         tvRezultatScanare.setTextColor(android.graphics.Color.parseColor("#008800"));
                     } else {
-                        tvRezultatScanare.setText("⚠️ MOD GUEST (NECUNOSCUT)\n\n" + rezultatAI);
+                        tvRezultatScanare.setText("⚠️ PACIENT NOU (GUEST MODE)\n\n" + rezultatAI);
                         tvRezultatScanare.setTextColor(android.graphics.Color.parseColor("#FF8800"));
                     }
 
                     btnTrimiteCatreAI.setVisibility(View.VISIBLE);
-                    btnTrimiteCatreAI.setText("CONFIRMĂ ȘI CONTINUĂ");
+                    btnTrimiteCatreAI.setText("CONFIRMĂ ȘI SOLICITĂ AJUTOR");
                     btnTrimiteCatreAI.setBackgroundColor(android.graphics.Color.parseColor("#2196F3"));
 
                     btnTrimiteCatreAI.setOnClickListener(vNext -> {
                         Intent intent = new Intent(ScanActivity.this, PacientActivity.class);
                         intent.putExtra("DATE_PACIENT_SCANAT", rezultatAI);
-                        intent.putExtra("ESTE_IN_SISTEM", gasitInSistem);
+                        intent.putExtra("CNP_PACIENT", cnpExtras); // Trimitem CNP-ul pentru a fi salvat în DB în ecranul următor
+                        intent.putExtra("ESTE_IN_SISTEM", finalGasitInSistem);
                         startActivity(intent);
                     });
 
@@ -169,17 +183,10 @@ public class ScanActivity extends AppCompatActivity {
         return "";
     }
 
-    private boolean verificaInBazaDeDateSimulata(String cnp) {
-        // Asigură-te că aceste CNP-uri sunt exact cele de pe buletinele de test
-        String cnpPaul = "1900101123456";
-        String cnpSilviu = "5031004270014";
-        return cnp.equals(cnpPaul) || cnp.equals(cnpSilviu);
-    }
-
     private String cereDateDeLaGoogle(Bitmap bitmap) {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 85, baos);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 80, baos);
             byte[] imageBytes = baos.toByteArray();
             String base64Image = Base64.encodeToString(imageBytes, Base64.NO_WRAP);
 
@@ -189,7 +196,7 @@ public class ScanActivity extends AppCompatActivity {
             JSONArray partsArray = new JSONArray();
 
             JSONObject textPart = new JSONObject();
-            textPart.put("text", "Extrage din acest buletin românesc: Nume, Prenume, CNP, Serie, Număr. Răspunde doar cu lista.");
+            textPart.put("text", "Extrage din acest buletin românesc datele: Nume, Prenume, CNP, Serie, Număr. Răspunde direct cu lista lor.");
             partsArray.put(textPart);
 
             JSONObject imagePart = new JSONObject();
@@ -203,9 +210,7 @@ public class ScanActivity extends AppCompatActivity {
             contentsArray.put(contentObj);
             jsonBody.put("contents", contentsArray);
 
-            // ACTUALIZARE URL: Folosim Gemini 3 Flash (Default 2026)
             URL url = new URL("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + API_KEY);
-
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
@@ -229,12 +234,14 @@ public class ScanActivity extends AppCompatActivity {
                         .getJSONObject(0)
                         .getString("text");
             } else {
-                // Citim eroarea detaliată pentru debug în caz că dă 400
-                Scanner s = new Scanner(new InputStreamReader(conn.getErrorStream()));
+                InputStreamReader isr = (conn.getErrorStream() != null) ?
+                        new InputStreamReader(conn.getErrorStream()) :
+                        new InputStreamReader(conn.getInputStream());
+                Scanner s = new Scanner(isr);
                 s.useDelimiter("\\A");
-                String error = s.hasNext() ? s.next() : "";
+                String errorMsg = s.hasNext() ? s.next() : "";
                 s.close();
-                return "EROARE_API " + responseCode + ": " + error;
+                return "EROARE_API " + responseCode + ": " + errorMsg;
             }
         } catch (Exception e) {
             return "EROARE_SISTEM: " + e.getMessage();

@@ -13,11 +13,16 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class LoginActivity extends AppCompatActivity {
 
     private EditText etEmailLogin, etPasswordLogin;
     private TextView tvForgotPassword;
     private Button btnLoginSubmit;
+    private DB_functions dbFunctions;
+    private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +42,8 @@ public class LoginActivity extends AppCompatActivity {
         tvForgotPassword = findViewById(R.id.tvForgotPassword);
         btnLoginSubmit = findViewById(R.id.btnLoginSubmit);
 
+        dbFunctions = new DB_functions();
+
         // 2. Acțiunea pentru Ai uitat parola
         tvForgotPassword.setOnClickListener(v -> {
             Intent intent = new Intent(LoginActivity.this, ChangePasswordActivity.class);
@@ -48,19 +55,50 @@ public class LoginActivity extends AppCompatActivity {
             String email = etEmailLogin.getText().toString().trim();
             String password = etPasswordLogin.getText().toString().trim();
 
-            if (email.equals("admin") && password.equals("admin")) {
-                Toast.makeText(LoginActivity.this, "Conectare reușită!", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(LoginActivity.this, PacientActivity.class);
-                startActivity(intent);
-                finish();
-            } else if (email.equals("medic") && password.equals("medic")) {
-                Toast.makeText(LoginActivity.this, "Autentificat ca Medic!", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(LoginActivity.this, MedicActivity.class);
-                startActivity(intent);
-                finish();
-            } else {
-                Toast.makeText(LoginActivity.this, "Date incorecte! Încearcă: admin / admin", Toast.LENGTH_SHORT).show();
+            if (email.isEmpty() || password.isEmpty()) {
+                Toast.makeText(LoginActivity.this, "Vă rugăm să introduceți email-ul și parola!", Toast.LENGTH_SHORT).show();
+                return;
             }
+
+            executorService.execute(() -> {
+                // Încercăm login ca operator (medic) mai întâi, folosind email-ul care ar putea fi cel instituțional
+                String operatorCnp = dbFunctions.loginOperator(email, password);
+                if (operatorCnp != null) {
+                    runOnUiThread(() -> {
+                        Toast.makeText(LoginActivity.this, "Autentificat ca Medic!", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(LoginActivity.this, MedicActivity.class);
+                        intent.putExtra("OPERATOR_CNP", operatorCnp);
+                        startActivity(intent);
+                        finish();
+                    });
+                    return;
+                }
+
+                // Dacă nu e medic, încercăm login ca pacient folosind email-ul personal
+                String patientCnp = dbFunctions.loginPatientcuMailandParola(email, password);
+                
+                if (patientCnp != null) {
+                    runOnUiThread(() -> {
+                        Toast.makeText(LoginActivity.this, "Conectare reușită (Pacient)!", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(LoginActivity.this, PacientActivity.class);
+                        intent.putExtra("PATIENT_CNP", patientCnp);
+                        startActivity(intent);
+                        finish();
+                    });
+                    return;
+                }
+
+                // Dacă niciuna nu a mers
+                runOnUiThread(() -> {
+                    Toast.makeText(LoginActivity.this, "Email sau parolă incorectă!", Toast.LENGTH_SHORT).show();
+                });
+            });
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        executorService.shutdown();
     }
 }

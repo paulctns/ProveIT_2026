@@ -16,11 +16,17 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class PacientActivity extends AppCompatActivity {
 
     private SwitchCompat switchPentruAltcineva;
     private EditText etDescriereUrgenta;
     private Button btnRequestAmbulanta, btnLogOut;
+    private DB_functions dbFunctions;
+    private ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private String patientCnp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,33 +46,41 @@ public class PacientActivity extends AppCompatActivity {
         btnRequestAmbulanta = findViewById(R.id.btnRequestAmbulanta);
         btnLogOut = findViewById(R.id.btnLogOut);
 
+        dbFunctions = new DB_functions();
+        patientCnp = getIntent().getStringExtra("PATIENT_CNP");
+
         // 2. Acțiunea pentru Butonul de Urgență (Request)
         btnRequestAmbulanta.setOnClickListener(v -> {
             String descriere = etDescriereUrgenta.getText().toString().trim();
 
             if (descriere.isEmpty()) {
                 Toast.makeText(PacientActivity.this, "Te rog să descrii urgența!", Toast.LENGTH_SHORT).show();
-                return; // Oprește execuția dacă nu a scris nimic
+                return;
             }
 
-            // Simulăm preluarea GPS-ului (Apare mesaj pe ecran)
-            Toast.makeText(PacientActivity.this, "Se preia locația GPS...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(PacientActivity.this, "Se preia locația GPS și se trimite cererea...", Toast.LENGTH_SHORT).show();
 
-            // Verificăm pentru cine este urgența ca să știm ce date trimitem la AI
             boolean pentruAltcineva = switchPentruAltcineva.isChecked();
+            boolean isForSelf = !pentruAltcineva;
 
-            // Așteptăm 1 secundă ca să pară că a preluat locația, apoi dăm mesajul final
-            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                if (pentruAltcineva) {
-                    Toast.makeText(PacientActivity.this, "Ambulanța a fost chemată la locația ta. Datele TALE medicale NU au fost atașate.", Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(PacientActivity.this, "Ambulanța chemată! Datele tale și descrierea au fost trimise la AI pentru triaj.", Toast.LENGTH_LONG).show();
-                }
+            executorService.execute(() -> {
+                // Presupunem 'yellow' ca prioritate implicită până la procesarea AI
+                // needsAmbulance e true implicit pentru acest buton
+                boolean success = dbFunctions.sendEmergencyRequest(patientCnp, "yellow", isForSelf, descriere, true, 15);
 
-                // Curățăm câmpul de text după trimitere
-                etDescriereUrgenta.setText("");
-
-            }, 1500);
+                runOnUiThread(() -> {
+                    if (success) {
+                        if (pentruAltcineva) {
+                            Toast.makeText(PacientActivity.this, "Ambulanța a fost chemată la locația ta. Datele TALE medicale NU au fost atașate.", Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(PacientActivity.this, "Ambulanța chemată! Datele tale și descrierea au fost trimise la AI pentru triaj.", Toast.LENGTH_LONG).show();
+                        }
+                        etDescriereUrgenta.setText("");
+                    } else {
+                        Toast.makeText(PacientActivity.this, "Eroare la trimiterea cererii! Verifică conexiunea.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            });
         });
 
         // 3. Acțiunea pentru Log Out
@@ -76,5 +90,11 @@ public class PacientActivity extends AppCompatActivity {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        executorService.shutdown();
     }
 }

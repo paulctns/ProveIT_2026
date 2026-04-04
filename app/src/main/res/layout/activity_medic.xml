@@ -14,11 +14,21 @@
         android:orientation="vertical">
 
         <TextView
+            android:id="@+id/tvMedicWelcome"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Panou Triaj Medic"
             android:textSize="26sp"
             android:textStyle="bold"
+            android:layout_marginBottom="4dp"/>
+
+        <TextView
+            android:id="@+id/tvMedicSpecialty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Specialitate"
+            android:textColor="#1976D2"
+            android:textSize="16sp"
             android:layout_marginBottom="8dp"/>
 
         <TextView

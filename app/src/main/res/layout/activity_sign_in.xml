@@ -80,7 +80,25 @@
 
             <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Date Personale și Istoric" android:textStyle="bold" android:layout_marginBottom="8dp"/>
 
-            <EditText android:id="@+id/etCNP" android:layout_width="match_parent" android:layout_height="50dp" android:hint="CNP / Serie și Nr. Buletin" android:inputType="text" android:background="#EEEEEE" android:padding="12dp" android:layout_marginBottom="8dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+                <EditText android:id="@+id/etFirstName" android:layout_width="0dp" android:layout_height="50dp" android:layout_weight="1" android:hint="Nume" android:background="#EEEEEE" android:padding="12dp" android:layout_marginRight="4dp"/>
+                <EditText android:id="@+id/etLastName" android:layout_width="0dp" android:layout_height="50dp" android:layout_weight="1" android:hint="Prenume" android:background="#EEEEEE" android:padding="12dp" android:layout_marginLeft="4dp"/>
+            </LinearLayout>
+
+            <EditText android:id="@+id/etCNP" android:layout_width="match_parent" android:layout_height="50dp" android:hint="CNP" android:inputType="number" android:background="#EEEEEE" android:padding="12dp" android:layout_marginBottom="8dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+                <EditText android:id="@+id/etSeries" android:layout_width="0dp" android:layout_height="50dp" android:layout_weight="1" android:hint="Serie CI" android:background="#EEEEEE" android:padding="12dp" android:layout_marginRight="4dp"/>
+                <EditText android:id="@+id/etNumber" android:layout_width="0dp" android:layout_height="50dp" android:layout_weight="2" android:hint="Număr CI" android:inputType="number" android:background="#EEEEEE" android:padding="12dp" android:layout_marginLeft="4dp"/>
+            </LinearLayout>
 
             <EditText
                 android:id="@+id/etVarsta"
@@ -109,11 +127,9 @@
 
             <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Date Profesionale Medic" android:textStyle="bold" android:layout_marginBottom="8dp"/>
 
-            <EditText android:id="@+id/etCodParafa" android:layout_width="match_parent" android:layout_height="50dp" android:hint="Cod Parafă" android:background="#EEEEEE" android:padding="12dp" android:layout_marginBottom="8dp"/>
+            <EditText android:id="@+id/etCodParafa" android:layout_width="match_parent" android:layout_height="50dp" android:hint="Cod Parafă" android:inputType="number" android:background="#EEEEEE" android:padding="12dp" android:layout_marginBottom="8dp"/>
             <EditText android:id="@+id/etEmailInstitutional" android:layout_width="match_parent" android:layout_height="50dp" android:hint="Email Instituțional (@spital.ro)" android:inputType="textEmailAddress" android:background="#EEEEEE" android:padding="12dp" android:layout_marginBottom="8dp"/>
-            <EditText android:id="@+id/etIDInstitutional" android:layout_width="match_parent" android:layout_height="50dp" android:hint="ID Instituțional (Legitimație)" android:background="#EEEEEE" android:padding="12dp" android:layout_marginBottom="8dp"/>
-            <EditText android:id="@+id/etUnitateMedicala" android:layout_width="match_parent" android:layout_height="50dp" android:hint="Unitate Medicală" android:background="#EEEEEE" android:padding="12dp" android:layout_marginBottom="8dp"/>
-            <EditText android:id="@+id/etDepartament" android:layout_width="match_parent" android:layout_height="50dp" android:hint="Departament" android:background="#EEEEEE" android:padding="12dp" android:layout_marginBottom="16dp"/>
+            <EditText android:id="@+id/etDepartament" android:layout_width="match_parent" android:layout_height="50dp" android:hint="Specialitate (ex: Cardiologie)" android:background="#EEEEEE" android:padding="12dp" android:layout_marginBottom="16dp"/>
         </LinearLayout>
 
         <Button

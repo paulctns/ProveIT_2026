@@ -21,13 +21,18 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class ScanActivity extends AppCompatActivity {
 
     private ImageView ivPreviewBuletin;
     private Button btnDeschideCamera, btnTrimiteCatreAI;
     private ProgressBar progressBarAI;
     private TextView tvStatusAI;
-    private Bitmap pozaBuletin; // Aici stocăm poza făcută
+    private Bitmap pozaBuletin;
+    private DB_functions dbFunctions;
+    private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     // Aceasta este funcția modernă care deschide camera și așteaptă rezultatul
     private final ActivityResultLauncher<Intent> cameraLauncher = registerForActivityResult(
@@ -68,6 +73,8 @@ public class ScanActivity extends AppCompatActivity {
         progressBarAI = findViewById(R.id.progressBarAI);
         tvStatusAI = findViewById(R.id.tvStatusAI);
 
+        dbFunctions = new DB_functions();
+
         // La click, deschidem camera telefonului
         btnDeschideCamera.setOnClickListener(v -> {
             Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -76,23 +83,48 @@ public class ScanActivity extends AppCompatActivity {
 
         // La click pe Analizare
         btnTrimiteCatreAI.setOnClickListener(v -> {
-            // Ascundem butonul și arătăm animația de încărcare
             btnTrimiteCatreAI.setVisibility(View.GONE);
             progressBarAI.setVisibility(View.VISIBLE);
             tvStatusAI.setVisibility(View.VISIBLE);
 
-            // Simulăm timpul de gândire al AI-ului (2.5 secunde) pentru prezentare
-            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                // Aici vom adăuga ulterior codul REAL care trimite poza la Google Gemini
+            executorService.execute(() -> {
+                // Simulăm procesul AI care extrage datele dintr-un buletin real
+                // În realitate, aici am trimite poza către Gemini AI
+                try {
+                    Thread.sleep(2500); // Simulăm latența AI
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
-                Toast.makeText(ScanActivity.this, "Scanare reușită! Datele au fost extrase.", Toast.LENGTH_LONG).show();
+                // Date simulate extrase din buletinul scanat
+                String cnpSimulat = "1900101123456";
+                String serieSimulata = "RX";
+                String numarSimulat = "123456";
 
-                // Trimitem pacientul logat în pagina principală (Dashboard)
-                Intent intent = new Intent(ScanActivity.this, PacientActivity.class);
-                startActivity(intent);
-                finish(); // Închide pagina de scanare
+                // Verificăm în baza de date
+                String patientCnp = dbFunctions.loginPatientDateBuletin(cnpSimulat, serieSimulata, numarSimulat);
 
-            }, 2500); // 2500 milisecunde = 2.5 secunde
+                runOnUiThread(() -> {
+                    if (patientCnp != null) {
+                        Toast.makeText(ScanActivity.this, "Identificare reușită!", Toast.LENGTH_LONG).show();
+                        Intent intent = new Intent(ScanActivity.this, PacientActivity.class);
+                        intent.putExtra("PATIENT_CNP", patientCnp);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        Toast.makeText(ScanActivity.this, "Pacientul nu a fost găsit. Vă rugăm să vă înregistrați.", Toast.LENGTH_LONG).show();
+                        btnTrimiteCatreAI.setVisibility(View.VISIBLE);
+                        progressBarAI.setVisibility(View.GONE);
+                        tvStatusAI.setVisibility(View.GONE);
+                    }
+                });
+            });
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        executorService.shutdown();
     }
 }

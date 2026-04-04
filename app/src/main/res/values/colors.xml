@@ -2,4 +2,6 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="dark_triage_blue">#0A1931</color>
+    <color name="fundal_splash">#0A1931</color>
 </resources>

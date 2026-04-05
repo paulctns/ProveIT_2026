@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Bifează Simptomele:" android:textStyle="bold" android:textSize="18sp"/>
+    <CheckBox android:id="@+id/cbFever" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Febră (Fever)"/>
+    <CheckBox android:id="@+id/cbCough" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tuse (Cough)"/>
+    <CheckBox android:id="@+id/cbFatigue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Oboseală (Fatigue)"/>
+    <CheckBox android:id="@+id/cbBreathing" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Dificultăți respirație"/>
+
+    <EditText android:id="@+id/etAge" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Vârsta (ex: 45)" android:inputType="number" android:layout_marginTop="10dp"/>
+
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Gen:" android:layout_marginTop="10dp"/>
+    <RadioGroup android:id="@+id/rgGender" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+        <RadioButton android:id="@+id/rbMale" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Masculin" android:checked="true"/>
+        <RadioButton android:id="@+id/rbFemale" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Feminin"/>
+    </RadioGroup>
+
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tensiune:" android:layout_marginTop="10dp"/>
+    <RadioGroup android:id="@+id/rgBlood" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+        <RadioButton android:id="@+id/rbBloodNormal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Normală" android:checked="true"/>
+        <RadioButton android:id="@+id/rbBloodHigh" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Mare"/>
+    </RadioGroup>
+
+    <Button android:id="@+id/btnPredict" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="AFLĂ DIAGNOSTIC (AI)" android:layout_marginTop="20dp" android:backgroundTint="#2196F3"/>
+
+    <TextView android:id="@+id/tvRezultat" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="22sp" android:textColor="#D32F2F" android:textStyle="bold" android:layout_marginTop="20dp" android:gravity="center"/>
+
+</LinearLayout>

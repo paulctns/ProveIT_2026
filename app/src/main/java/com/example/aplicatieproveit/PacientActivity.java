@@ -104,6 +104,7 @@ public class PacientActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
+        TriageEngine.descarcaSiAntreneaza("10.177.102.17");
 
         layoutPrincipal = findViewById(R.id.main);
         layoutAnimatieUrmarire = findViewById(R.id.layoutAnimatieUrmarire);
@@ -166,12 +167,14 @@ public class PacientActivity extends AppCompatActivity {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
         executor.execute(() -> {
+            // 1. Apelăm Gemini pentru a extrage cuvintele cheie
             String rezultatGemini = cereSimptomeDeLaGemini(descriere);
             handler.post(() -> {
                 if (rezultatGemini.startsWith("EROARE")) {
                     salveazaUrgenta(descriere, rezultatGemini, "Triaj Manual", 2, "Pacient", "Fără istoric");
                 } else {
                     List<String> simptome = Arrays.asList(rezultatGemini.split("\\s*,\\s*"));
+                    // 2. Trecem la AI-ul nostru de Machine Learning
                     executaTriajMatematic(descriere, simptome);
                 }
             });
@@ -180,7 +183,7 @@ public class PacientActivity extends AppCompatActivity {
 
     private String cereSimptomeDeLaGemini(String descriere) {
         try {
-            String prompt = "Ești un sistem medical. Alege din următoarea listă strict simptomele care se regăsesc în text: durere_piept, transpiratie, durere_brat_stang, respiratie_grea, asimetrie_faciala, amorteala_brat, dificultate_vorbire, confuzie, umflare_fata, respiratie_suieratoare, eruptie_cutanata, puls_rapid, durere_abdomen_dreapta_jos, greata, varsaturi, febra_usoara, tuse_seaca, senzatie_sufocare, durere_intensa_os, deformare_zona, imposibilitate_miscare, umflare, crampe_abdominale, diaree, durere_lombara, durere_iradiata_inghinal, sange_urina, tuse, nas_infundat, durere_gat, mancarime, roseata_piele, stranut, ochi_inlacrimati. Răspunde STRICT cu simptomele găsite, separate prin virgulă. Text: " + descriere;
+            String prompt = "Ești un sistem medical. Alege din următoarea listă strict simptomele care se regăsesc în text: durere_piept, transpiratie, durere_brat_stang, respiratie_grea, asimetrie_faciala, amorteala_brat, dificultate_vorbire, confuzie, umflare_fata, respiratie_suieratoare, eruptie_cutanata, puls_rapid, durere_abdomen_dreapta_jos, greata, varsaturi, febra_usoara, tuse_seaca, senzatie_sufocare, durere_intensa_os, deformare_zona, imposibilitate_miscare, umflare, crampe_abdominale, diaree, durere_lombara, durere_iradiata_inghinal, sange_urina, tuse, nas_infundat, durere_gat, mancarime, roseata_piele, stranut, ochi_inlacrimati, oboseala. Răspunde STRICT cu simptomele găsite, separate prin virgulă. Text: " + descriere;
             JSONObject jsonBody = new JSONObject();
             JSONArray contentsArray = new JSONArray();
             JSONObject contentObj = new JSONObject();
@@ -217,44 +220,62 @@ public class PacientActivity extends AppCompatActivity {
         String uid = mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getUid() : "anonim";
 
         db.collection("Users").document(uid).get().addOnSuccessListener(userDoc -> {
-            List<String> istoricMedical = null;
             String numePacient = "Pacient Necunoscut";
             String istoricPentruMedic = "Fără antecedente medicale declarate.";
 
             if (userDoc.exists()) {
-                if (userDoc.contains("nume")) {
-                    numePacient = userDoc.getString("nume");
-                } else if (userDoc.contains("email")) {
-                    numePacient = userDoc.getString("email");
-                }
+                if (userDoc.contains("nume")) numePacient = userDoc.getString("nume");
+                else if (userDoc.contains("email")) numePacient = userDoc.getString("email");
 
                 if (userDoc.contains("istoric_medical")) {
-                    istoricMedical = (List<String>) userDoc.get("istoric_medical");
+                    List<String> istoricMedical = (List<String>) userDoc.get("istoric_medical");
                     if (istoricMedical != null && !istoricMedical.isEmpty()) {
                         istoricPentruMedic = android.text.TextUtils.join(", ", istoricMedical);
                     }
                 }
             }
 
-            final List<String> finalIstoric = istoricMedical;
             final String finalNume = numePacient;
             final String finalIstoricText = istoricPentruMedic;
 
-            db.collection("Afectiuni").get().addOnSuccessListener(querySnapshots -> {
-                Afectiune topBoala = null;
-                double maxScor = -1.0;
-                for (QueryDocumentSnapshot doc : querySnapshots) {
-                    Afectiune boala = doc.toObject(Afectiune.class);
-                    boala.id = doc.getId();
+            // =========================================================
+            // 1. CONVERTIM SIMPTOMELE GEMINI PENTRU PYTHON AI
+            // =========================================================
+            boolean fever = simptomePacient.contains("febra_usoara");
+            boolean cough = simptomePacient.contains("tuse") || simptomePacient.contains("tuse_seaca");
+            boolean fatigue = simptomePacient.contains("oboseala");
+            boolean breathing = simptomePacient.contains("respiratie_grea") || simptomePacient.contains("senzatie_sufocare");
 
-                    double scor = TriageEngine.calculeazaScor(boala, simptomePacient, finalIstoric);
-                    if (scor > maxScor) { maxScor = scor; topBoala = boala; }
+            // Extragem Vârsta din Firebase (dacă ai salvat-o ca String la SignIn)
+            int age = 30; // Default
+            if (userDoc.contains("varsta") && userDoc.getString("varsta") != null) {
+                try { age = Integer.parseInt(userDoc.getString("varsta")); } catch (Exception ignored) {}
+            }
+
+            // Trimitem parametrii default pentru Gen (1=Masculin), Tensiune(1=Normal), Colesterol(1=Normal)
+            int gen = 1;
+            int tensiune = 1;
+            int colesterol = 1;
+
+            // =========================================================
+            // 2. APELĂM NOUL MOTOR DE MACHINE LEARNING DIN PYTHON
+            // =========================================================
+            TriageEngine.evalueazaCuAI(fever, cough, fatigue, breathing, age, gen, tensiune, colesterol, new TriageEngine.AICallback() {
+                @Override
+                public void onSuccess(String diagnostic_ai, String departament_ai, long prioritate, double probabilitate) {
+                    runOnUiThread(() -> {
+                        // AI-ul a răspuns cu succes! Salvăm urgența în Firebase
+                        salveazaUrgenta(descriere, diagnostic_ai, departament_ai, (int) prioritate, finalNume, finalIstoricText);
+                    });
                 }
 
-                if (topBoala != null && maxScor > 0.0001) {
-                    salveazaUrgenta(descriere, topBoala.nume, topBoala.departament, (int) topBoala.prioritate, finalNume, finalIstoricText);
-                } else {
-                    salveazaUrgenta(descriere, "Simptome nespecifice", "Triaj General", 4, finalNume, finalIstoricText);
+                @Override
+                public void onError(String mesajEroare) {
+                    runOnUiThread(() -> {
+                        Toast.makeText(PacientActivity.this, "Eroare AI: " + mesajEroare, Toast.LENGTH_LONG).show();
+                        // Dacă pică Python-ul, punem un sistem de rezervă (Fallback) ca să nu se blocheze aplicația
+                        salveazaUrgenta(descriere, "Diagnostic Neclar (Eroare Server AI)", "Triaj General", 4, finalNume, finalIstoricText);
+                    });
                 }
             });
         });

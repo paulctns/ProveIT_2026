@@ -26,24 +26,20 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        // Conectăm butoanele
         btnGoToLogIn = findViewById(R.id.btnGoToLogIn);
         btnGoToSignIn = findViewById(R.id.btnGoToSignIn);
         btnGoToScanCI = findViewById(R.id.btnGoToScanCI);
 
-        // Navigare spre ecranul de Log In
         btnGoToLogIn.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(intent);
         });
 
-        // Navigare spre ecranul de Sign In
         btnGoToSignIn.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, SignInActivity.class);
             startActivity(intent);
         });
 
-        // Navigare spre ecranul de Scanare CI
         btnGoToScanCI.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, ScanActivity.class);
             startActivity(intent);

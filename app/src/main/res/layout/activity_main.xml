@@ -1,53 +1,132 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="32dp"
-    android:gravity="center">
+    android:background="#1B5E20"
+    android:padding="24dp">
+
+    <View
+        android:layout_width="450dp"
+        android:layout_height="450dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="-180dp"
+        android:alpha="0.15"
+        android:background="@android:drawable/presence_online"
+        android:backgroundTint="#81C784" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvLogoTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-black"
+            android:letterSpacing="0.05"
+            android:text="DACUL SĂNĂTOS"
+            android:textColor="#FFFFFF"
+            android:textSize="38sp"
+            android:textStyle="bold"
+            android:shadowColor="#80FFFFFF"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="15" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="60dp"
+            android:letterSpacing="0.2"
+            android:text="SISTEM NAȚIONAL DE TRIAJ"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="60dp"
+            app:cardBackgroundColor="#26000000"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="24dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnGoToLogIn"
+                    android:layout_width="match_parent"
+                    android:layout_height="65dp"
+                    android:layout_marginBottom="12dp"
+                    android:text="AUTENTIFICARE"
+                    android:textColor="#1B5E20"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:backgroundTint="#FFFFFF"
+                    app:cornerRadius="16dp"
+                    app:elevation="8dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnGoToSignIn"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:text="CREARE CONT NOU"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="16dp"
+                    app:strokeColor="#FFFFFF"
+                    app:strokeWidth="2dp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:text="CAZ CRITIC - TRIAGE URGENT"
+            android:textColor="#FFCDD2"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnGoToScanCI"
+            android:layout_width="match_parent"
+            android:layout_height="85dp"
+            android:text="SCANARE RAPIDĂ C.I."
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:backgroundTint="#D32F2F"
+            app:cornerRadius="20dp"
+            app:elevation="12dp"
+            app:icon="@android:drawable/ic_menu_camera"
+            app:iconGravity="textStart"
+            app:iconPadding="16dp"
+            app:iconTint="#FFFFFF" />
+
+    </LinearLayout>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="ProveIT Triage"
-        android:textSize="36sp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:text="© 2026 MINISTERUL SĂNĂTĂȚII | v2.2"
+        android:textColor="#FFFFFF"
+        android:textSize="11sp"
         android:textStyle="bold"
-        android:layout_marginBottom="64dp"/>
+        android:alpha="0.7" />
 
-    <Button
-        android:id="@+id/btnGoToLogIn"
-        android:layout_width="match_parent"
-        android:layout_height="65dp"
-        android:text="Log In"
-        android:textSize="18sp"
-        android:backgroundTint="#2196F3"
-        android:layout_marginBottom="16dp"/>
-
-    <Button
-        android:id="@+id/btnGoToSignIn"
-        android:layout_width="match_parent"
-        android:layout_height="65dp"
-        android:text="Sign In (Cont Nou)"
-        android:textSize="18sp"
-        android:backgroundTint="#4CAF50"
-        android:layout_marginBottom="48dp"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Ai o urgență majoră?"
-        android:textStyle="bold"
-        android:textColor="#D32F2F"
-        android:layout_marginBottom="8dp"/>
-
-    <Button
-        android:id="@+id/btnGoToScanCI"
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:text="📷 Scanare CI (Urgențe)"
-        android:textSize="18sp"
-        android:backgroundTint="#D32F2F"
-        android:textColor="#FFFFFF"/>
-
-</LinearLayout>
+</RelativeLayout>

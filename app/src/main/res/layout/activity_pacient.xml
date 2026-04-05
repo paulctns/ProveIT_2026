@@ -1,77 +1,139 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="24dp"
-    android:fillViewport="true">
+    android:background="#1B5E20">
 
-    <LinearLayout
+    <View
+        android:layout_width="400dp"
+        android:layout_height="400dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="-200dp"
+        android:alpha="0.15"
+        android:background="@android:drawable/presence_online"
+        android:backgroundTint="#81C784" />
+
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:padding="24dp"
+        android:scrollbars="none">
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Dashboard Pacient"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:layout_marginBottom="32dp"/>
+            android:orientation="vertical">
 
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/switchPentruAltcineva"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Urgența este pentru altă persoană?"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="24dp"
-            android:padding="12dp"
-            android:background="#EEEEEE"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:fontFamily="sans-serif-black"
+                android:text="DASHBOARD PACIENT"
+                android:textColor="#FFFFFF"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                android:gravity="center" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Descrie urgența / simptomele:"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="40dp"
+                android:text="SISTEM DE ASISTENȚĂ RAPIDĂ"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.1"
+                android:gravity="center" />
 
-        <EditText
-            android:id="@+id/etDescriereUrgenta"
-            android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:gravity="top|start"
-            android:hint="Ex: Dureri puternice în piept, dificultăți de respirație, persoană inconștientă..."
-            android:inputType="textMultiLine"
-            android:background="#EEEEEE"
-            android:padding="12dp"
-            android:layout_marginBottom="32dp"/>
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardBackgroundColor="#4D000000"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#FFFFFF"
+                app:strokeWidth="3dp">
 
-        <Button
-            android:id="@+id/btnRequestAmbulanta"
-            android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:text="🚨 SOLICITĂ AMBULANȚĂ (GPS)"
-            android:backgroundTint="#D32F2F"
-            android:textColor="#FFFFFF"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="32dp"/>
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/switchPentruAltcineva"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="22dp"
+                    android:text="Urgența este pentru altă persoană?"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:thumbTint="#FFFFFF"
+                    app:trackTint="#4CAF50" />
+            </androidx.cardview.widget.CardView>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:text="DESCRIE URGENȚA / SIMPTOMELE:"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.05" />
 
-        <Button
-            android:id="@+id/btnLogOut"
-            android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:text="Log Out"
-            android:backgroundTint="#757575"
-            android:layout_marginTop="16dp"/>
+            <EditText
+                android:id="@+id/etDescriereUrgenta"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:layout_marginBottom="32dp"
+                android:background="@android:drawable/editbox_background"
+                android:backgroundTint="#F5F5F5"
+                android:elevation="10dp"
+                android:translationZ="5dp"
+                android:gravity="top|start"
+                android:hint="Ex: Dureri puternice în piept, dificultăți de respirație, accident..."
+                android:inputType="textMultiLine"
+                android:padding="16dp"
+                android:textColor="#1B5E20"
+                android:textStyle="bold"
+                android:textSize="17sp" />
 
-    </LinearLayout>
-</ScrollView>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRequestAmbulanta"
+                android:layout_width="match_parent"
+                android:layout_height="85dp"
+                android:layout_marginBottom="32dp"
+                android:text="🚨 SOLICITĂ AMBULANȚĂ"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:backgroundTint="#D32F2F"
+                app:cornerRadius="20dp"
+                app:elevation="12dp"
+                android:shadowColor="#BFD32F2F"
+                android:shadowRadius="30" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnLogOut"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="65dp"
+                android:layout_marginTop="16dp"
+                android:text="IEȘIRE DIN SESIUNE"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:cornerRadius="16dp"
+                app:strokeColor="#FFFFFF"
+                app:strokeWidth="3dp" />
+
+        </LinearLayout>
+    </ScrollView>
+</RelativeLayout>

@@ -1,69 +1,150 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="24dp"
-    android:gravity="center_horizontal"
-    android:background="#FFFFFF">
+    android:background="#1B5E20"
+    android:padding="24dp">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/headerScan"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Scanare Buletin"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="#000000"
-        android:layout_marginBottom="24dp"/>
+        android:orientation="vertical"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="24dp"
+        android:gravity="center">
 
-    <ImageView
-        android:id="@+id/ivPreviewBuletin"
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-black"
+            android:text="SCANARE BIOMETRICĂ"
+            android:textColor="#FFFFFF"
+            android:textSize="26sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="IDENTIFICARE RAPIDĂ PRIN GEMINI AI"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.1" />
+    </LinearLayout>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardPreview"
         android:layout_width="match_parent"
         android:layout_height="250dp"
-        android:background="#EEEEEE"
-        android:scaleType="fitCenter"
-        android:layout_marginBottom="16dp" />
+        android:layout_below="@id/headerScan"
+        android:layout_marginBottom="24dp"
+        app:cardBackgroundColor="#26000000"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="0dp"
+        app:strokeColor="#FFFFFF"
+        app:strokeWidth="3dp">
 
-    <Button
-        android:id="@+id/btnDeschideCamera"
+        <ImageView
+            android:id="@+id/ivPreviewBuletin"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:alpha="0.9" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:layout_gravity="center"
+            android:background="#FFFFFF"
+            android:alpha="0.6"/>
+    </androidx.cardview.widget.CardView>
+
+    <LinearLayout
+        android:id="@+id/controlsScan"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:text="Fă poză la buletin"
-        android:backgroundTint="#2196F3"/>
+        android:layout_height="wrap_content"
+        android:layout_below="@id/cardPreview"
+        android:orientation="vertical">
 
-    <Button
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDeschideCamera"
+            android:layout_width="match_parent"
+            android:layout_height="65dp"
+            android:layout_marginBottom="12dp"
+            android:text="DESCHIDE CAMERA"
+            android:textColor="#1B5E20"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            app:backgroundTint="#FFFFFF"
+            app:cornerRadius="16dp"
+            app:icon="@android:drawable/ic_menu_camera"
+            app:iconSize="28dp"
+            app:iconTint="#757575" /> <com.google.android.material.button.MaterialButton
         android:id="@+id/btnTrimiteCatreAI"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:text="Analizează buletinul"
+        android:layout_height="65dp"
+        android:text="ANALIZEAZĂ BULETIN"
+        android:textColor="#FFFFFF"
+        android:textSize="17sp"
+        android:textStyle="bold"
         android:visibility="gone"
-        android:backgroundTint="#4CAF50" />
+        app:backgroundTint="#4CAF50"
+        app:cornerRadius="16dp"
+        app:strokeColor="#FFFFFF"
+        app:strokeWidth="3dp" /> </LinearLayout>
 
-    <ProgressBar
-        android:id="@+id/progressBarAI"
+    <LinearLayout
+        android:id="@+id/statusContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:layout_marginTop="16dp" />
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
 
-    <TextView
-        android:id="@+id/tvStatusAI"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Gemini procesează..."
-        android:visibility="gone"
-        android:layout_marginTop="8dp" />
+        <ProgressBar
+            android:id="@+id/progressBarAI"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:indeterminateTint="#FFFFFF"
+            android:indeterminate="true" />
 
-    <TextView
-        android:id="@+id/tvRezultatScanare"
+        <TextView
+            android:id="@+id/tvStatusAI"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="GEMINI PROCESEAZĂ..."
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="Datele vor apărea aici..."
-        android:textSize="16sp"
-        android:textColor="#333333"
-        android:padding="12dp"
-        android:background="#F5F5F5" />
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="8dp"
+        app:cardBackgroundColor="#80000000"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        app:strokeColor="#FFFFFF"
+        app:strokeWidth="2dp">
 
-</LinearLayout>
+        <TextView
+            android:id="@+id/tvRezultatScanare"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="22dp"
+            android:text="AȘTEPTARE DATE SCANARE"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:letterSpacing="0.05" />
+    </androidx.cardview.widget.CardView>
+
+</RelativeLayout>

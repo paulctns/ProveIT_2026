@@ -4,4 +4,12 @@
     <color name="white">#FFFFFFFF</color>
     <color name="dark_triage_blue">#0A1931</color>
     <color name="fundal_splash">#0A1931</color>
+    <color name="med_dark_blue">#0A192F</color>
+
+    <color name="med_cyan">#00D2FF</color>
+
+    <color name="med_red">#FF3B30</color>
+
+    <color name="light_gray">#B0B0B0</color>
+    <color name="verde_dacul">#1B5E20</color>
 </resources>

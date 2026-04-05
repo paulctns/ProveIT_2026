@@ -1,66 +1,139 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="32dp"
-    android:gravity="center">
+    android:background="#1B5E20"
+    android:padding="24dp">
+
+    <View
+        android:layout_width="450dp"
+        android:layout_height="450dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="-220dp"
+        android:alpha="0.15"
+        android:background="@android:drawable/presence_online"
+        android:backgroundTint="#81C784" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-black"
+            android:text="BINE AI REVENIT"
+            android:textColor="#FFFFFF"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:shadowColor="#80FFFFFF"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="10" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="48dp"
+            android:text="ACCES SECURIZAT PERSONAL MEDICAL"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:alpha="0.8"
+            android:letterSpacing="0.1" />
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardBackgroundColor="#26000000"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="24dp">
+
+                <EditText
+                    android:id="@+id/etEmailLogin"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@android:drawable/editbox_background"
+                    android:backgroundTint="#F5F5F5"
+                    android:hint="Email Instituțional"
+                    android:inputType="textEmailAddress"
+                    android:padding="16dp"
+                    android:textColor="#1B5E20"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:endIconMode="password_toggle"
+                    app:endIconTint="#1B5E20"
+                    app:hintEnabled="false">
+
+                    <EditText
+                        android:id="@+id/etPasswordLogin"
+                        android:layout_width="match_parent"
+                        android:layout_height="60dp"
+                        android:background="@android:drawable/editbox_background"
+                        android:backgroundTint="#F5F5F5"
+                        android:hint="Parolă"
+                        android:inputType="textPassword"
+                        android:padding="16dp"
+                        android:textColor="#1B5E20"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:id="@+id/tvForgotPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:padding="8dp"
+                    android:text="Ai uitat parola?"
+                    android:textAlignment="viewEnd"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnLoginSubmit"
+            android:layout_width="match_parent"
+            android:layout_height="65dp"
+            android:text="CONECTARE"
+            android:textColor="#1B5E20"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:backgroundTint="#FFFFFF"
+            app:cornerRadius="16dp"
+            app:elevation="8dp" />
+
+    </LinearLayout>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Bine ai revenit!"
-        android:textSize="32sp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:text="DACUL SĂNĂTOS SECURITATE v2.2"
+        android:textColor="#FFFFFF"
+        android:textSize="11sp"
         android:textStyle="bold"
-        android:layout_marginBottom="48dp"/>
+        android:alpha="0.6" />
 
-    <EditText
-        android:id="@+id/etEmailLogin"
-        android:layout_width="match_parent"
-        android:layout_height="55dp"
-        android:hint="Email"
-        android:inputType="textEmailAddress"
-        android:background="#EEEEEE"
-        android:padding="12dp"
-        android:layout_marginBottom="16dp"/>
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        app:endIconMode="password_toggle"
-        app:hintEnabled="false">
-
-        <EditText
-            android:id="@+id/etPasswordLogin"
-            android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:hint="Parolă"
-            android:inputType="textPassword"
-            android:background="#EEEEEE"
-            android:padding="12dp"/>
-
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <TextView
-        android:id="@+id/tvForgotPassword"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Ai uitat parola?"
-        android:textColor="#2196F3"
-        android:textStyle="bold"
-        android:textAlignment="viewEnd"
-        android:padding="8dp"
-        android:layout_marginBottom="32dp"/>
-
-    <Button
-        android:id="@+id/btnLoginSubmit"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:text="Conectare"
-        android:backgroundTint="#2196F3"
-        android:textSize="18sp"/>
-
-</LinearLayout>
+</RelativeLayout>

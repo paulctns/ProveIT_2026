@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/main_frame"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#1B5E20">
@@ -37,12 +36,13 @@
                 android:textColor="#FFFFFF"
                 android:textSize="28sp"
                 android:textStyle="bold"
-                android:gravity="center" />
+                android:gravity="center"
+                android:layout_marginBottom="8dp"/>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="40dp"
+                android:layout_marginBottom="32dp"
                 android:text="SISTEM DE ASISTENȚĂ RAPIDĂ"
                 android:textColor="#FFFFFF"
                 android:textSize="14sp"
@@ -85,14 +85,14 @@
             <EditText
                 android:id="@+id/etDescriereUrgenta"
                 android:layout_width="match_parent"
-                android:layout_height="180dp"
+                android:layout_height="160dp"
                 android:layout_marginBottom="32dp"
                 android:background="@android:drawable/editbox_background"
                 android:backgroundTint="#F5F5F5"
                 android:elevation="10dp"
                 android:translationZ="5dp"
                 android:gravity="top|start"
-                android:hint="Ex: Dureri puternice în piept, dificultăți de respirație..."
+                android:hint="Ex: Dureri în piept, dificultăți de respirație, persoană inconștientă..."
                 android:inputType="textMultiLine"
                 android:padding="16dp"
                 android:textColor="#1B5E20"
@@ -130,7 +130,8 @@
                 android:textStyle="bold"
                 app:cornerRadius="16dp"
                 app:strokeColor="#FFFFFF"
-                app:strokeWidth="3dp" />
+                app:strokeWidth="3dp"
+                android:layout_marginTop="16dp"/>
         </LinearLayout>
     </ScrollView>
 
@@ -144,10 +145,10 @@
         android:padding="24dp">
 
         <View
-            android:layout_width="300dp"
-            android:layout_height="300dp"
+            android:layout_width="280dp"
+            android:layout_height="280dp"
             android:layout_centerInParent="true"
-            android:alpha="0.2"
+            android:alpha="0.15"
             android:background="@android:drawable/presence_online"
             android:backgroundTint="#00D2FF" />
 
@@ -172,14 +173,16 @@
             android:textSize="55sp"
             android:textStyle="bold"
             android:textColor="#00D2FF"
-            android:shadowColor="#4D00D2FF"
-            android:shadowRadius="20"/>
+            android:shadowColor="#8000D2FF"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="20" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/progressBarCircular"
-            android:layout_marginTop="50dp"
+            android:layout_marginTop="40dp"
             android:gravity="center"
             android:orientation="vertical">
 
@@ -191,17 +194,20 @@
                 android:textSize="22sp"
                 android:fontFamily="sans-serif-black"
                 android:textStyle="bold"
-                android:letterSpacing="0.05"/>
+                android:letterSpacing="0.05"
+                android:gravity="center"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Echipajul a fost alertat prin GPS"
+                android:layout_marginTop="12dp"
+                android:text="Echipajul a fost alertat prin GPS.\nRămâneți calm și asigurați calea de acces."
                 android:textColor="#A5D6A7"
                 android:textSize="14sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:textAlignment="center"/>
         </LinearLayout>
+
     </RelativeLayout>
 
 </FrameLayout>

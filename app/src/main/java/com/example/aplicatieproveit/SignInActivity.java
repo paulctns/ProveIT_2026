@@ -36,7 +36,7 @@ public class SignInActivity extends AppCompatActivity {
 
     private EditText etEmail, etPassword;
     private EditText etCNP, etVarsta, etGrupaSange, etAlergii, etBoli, etMedicamente;
-    private EditText etCodParafa, etEmailInstitutional, etIDInstitutional, etUnitateMedicala, etDepartament;
+    private EditText etCodParafa, etIDInstitutional, etUnitateMedicala, etDepartament;
 
     private Button btnSubmitSignIn;
 
@@ -65,8 +65,10 @@ public class SignInActivity extends AppCompatActivity {
         rbMedic = findViewById(R.id.rbMedic);
         layoutDateMedic = findViewById(R.id.layoutDateMedic);
 
+        // Aici avem un singur câmp de email!
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
+
         etCNP = findViewById(R.id.etCNP);
         etVarsta = findViewById(R.id.etVarsta);
         etGrupaSange = findViewById(R.id.etGrupaSange);
@@ -75,19 +77,20 @@ public class SignInActivity extends AppCompatActivity {
         etMedicamente = findViewById(R.id.etMedicamente);
 
         etCodParafa = findViewById(R.id.etCodParafa);
-        etEmailInstitutional = findViewById(R.id.etEmailInstitutional);
         etIDInstitutional = findViewById(R.id.etIDInstitutional);
         etUnitateMedicala = findViewById(R.id.etUnitateMedicala);
         etDepartament = findViewById(R.id.etDepartament);
 
         btnSubmitSignIn = findViewById(R.id.btnSubmitSignIn);
 
-        // 3. Switch vizibilitate Medic/Pacient
+        // 3. Switch vizibilitate Medic/Pacient și SCHIMBARE DINAMICĂ A HINT-ULUI
         rgTipUtilizator.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.rbPacient) {
                 layoutDateMedic.setVisibility(View.GONE);
+                etEmail.setHint("Adresă Email Personal"); // Schimbăm textul ajutător
             } else {
                 layoutDateMedic.setVisibility(View.VISIBLE);
+                etEmail.setHint("Adresă Email Instituțional"); // Schimbăm textul ajutător
             }
         });
 
@@ -95,6 +98,7 @@ public class SignInActivity extends AppCompatActivity {
     }
 
     private void creazaContFirebase() {
+        // Acum preluăm mereu din etEmail, indiferent de tipul utilizatorului
         String email = etEmail.getText().toString().trim();
         String parola = etPassword.getText().toString().trim();
 
@@ -122,9 +126,10 @@ public class SignInActivity extends AppCompatActivity {
                 });
     }
 
-    private void salveazaDateInFirestore(String userId, String email) {
+    private void salveazaDateInFirestore(String userId, String emailFolosit) {
         Map<String, Object> userData = new HashMap<>();
-        userData.put("email", email);
+
+        userData.put("email", emailFolosit);
 
         // Preluăm textele din câmpuri
         String cnp = etCNP.getText().toString().trim();
@@ -141,8 +146,6 @@ public class SignInActivity extends AppCompatActivity {
         userData.put("alergii", alergiiText);
         userData.put("medicamente", medicamente);
 
-        // ⚠️ AICI E REZOLVAREA PENTRU AI-UL TĂU ⚠️
-        // Transformăm ce a scris omul la boli și alergii într-o listă pentru Naive Bayes
         List<String> istoricMedical = new ArrayList<>();
         if (!boliText.isEmpty()) {
             istoricMedical.addAll(Arrays.asList(boliText.split("\\s*,\\s*")));
@@ -150,7 +153,6 @@ public class SignInActivity extends AppCompatActivity {
         if (!alergiiText.isEmpty()) {
             istoricMedical.addAll(Arrays.asList(alergiiText.split("\\s*,\\s*")));
         }
-        // Salvăm lista sub numele exact pe care îl caută motorul de triaj
         userData.put("istoric_medical", istoricMedical);
 
         if (rbPacient.isChecked()) {
@@ -158,7 +160,6 @@ public class SignInActivity extends AppCompatActivity {
         } else {
             userData.put("tip_utilizator", "medic");
             userData.put("cod_parafa", etCodParafa.getText().toString().trim());
-            userData.put("email_institutional", etEmailInstitutional.getText().toString().trim());
             userData.put("id_institutional", etIDInstitutional.getText().toString().trim());
             userData.put("unitate_medicala", etUnitateMedicala.getText().toString().trim());
             userData.put("departament", etDepartament.getText().toString().trim());

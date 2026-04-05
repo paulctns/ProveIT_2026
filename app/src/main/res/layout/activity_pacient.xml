@@ -93,6 +93,7 @@
                 android:translationZ="5dp"
                 android:gravity="top|start"
                 android:hint="Ex: Dureri în piept, dificultăți de respirație, persoană inconștientă..."
+                android:textColorHint="#555555"
                 android:inputType="textMultiLine"
                 android:padding="16dp"
                 android:textColor="#1B5E20"

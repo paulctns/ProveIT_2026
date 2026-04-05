@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/AplicatieProveIT.iml" filepath="$PROJECT_DIR$/.idea/modules/AplicatieProveIT.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/AplicatieProveIT.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/AplicatieProveIT.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/AplicatieProveIT.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/AplicatieProveIT.app.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/AplicatieProveIT.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/AplicatieProveIT.app.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/AplicatieProveIT.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/AplicatieProveIT.app.unitTest.iml" />
+    </modules>
+  </component>
+</project>

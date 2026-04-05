@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="32dp"
+    android:gravity="center">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ProveIT Triage"
+        android:textSize="36sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="64dp"/>
+
+    <Button
+        android:id="@+id/btnGoToLogIn"
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:text="Log In"
+        android:textSize="18sp"
+        android:backgroundTint="#2196F3"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/btnGoToSignIn"
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:text="Sign In (Cont Nou)"
+        android:textSize="18sp"
+        android:backgroundTint="#4CAF50"
+        android:layout_marginBottom="48dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ai o urgență majoră?"
+        android:textStyle="bold"
+        android:textColor="#D32F2F"
+        android:layout_marginBottom="8dp"/>
+
+    <Button
+        android:id="@+id/btnGoToScanCI"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:text="📷 Scanare CI (Urgențe)"
+        android:textSize="18sp"
+        android:backgroundTint="#D32F2F"
+        android:textColor="#FFFFFF"/>
+
+</LinearLayout>

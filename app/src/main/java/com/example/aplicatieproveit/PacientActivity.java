@@ -10,10 +10,12 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
+import android.speech.RecognizerIntent;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -41,10 +43,12 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
@@ -55,19 +59,33 @@ public class PacientActivity extends AppCompatActivity {
     private SwitchCompat switchPentruAltcineva;
     private EditText etDescriereUrgenta;
     private Button btnRequestAmbulanta, btnLogOut;
+    private ImageButton btnVoiceInput;
     private View layoutPrincipal;
 
     private RelativeLayout layoutAnimatieUrmarire;
     private ProgressBar progressBarCircular;
     private TextView tvCountdown;
+    private TextView tvMesajStatus;
 
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
-    private final String API_KEY = BuildConfig.API_KEY;
+
+    private final String API_KEY = "AIzaSyDrGnxDs3aaFDT32Ir-6VPZwH9i8MQsE3A";
 
     private double userLat = 0.0, userLon = 0.0;
-    private int etaMinute = 12;
+    private int etaMinute = 1;
     private String textDescriereTemp = "";
+    private String idDocumentCurent = "";
+
+    private final ActivityResultLauncher<Intent> voiceLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    ArrayList<String> matches = result.getData().getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                    if (matches != null && !matches.isEmpty()) {
+                        etDescriereUrgenta.setText(matches.get(0));
+                    }
+                }
+            });
 
     private final ActivityResultLauncher<String[]> cererePermisiuniGPS = registerForActivityResult(
             new ActivityResultContracts.RequestMultiplePermissions(), result -> {
@@ -91,11 +109,22 @@ public class PacientActivity extends AppCompatActivity {
         layoutAnimatieUrmarire = findViewById(R.id.layoutAnimatieUrmarire);
         progressBarCircular = findViewById(R.id.progressBarCircular);
         tvCountdown = findViewById(R.id.tvCountdown);
+        tvMesajStatus = (TextView) layoutAnimatieUrmarire.getChildAt(2);
 
         switchPentruAltcineva = findViewById(R.id.switchPentruAltcineva);
         etDescriereUrgenta = findViewById(R.id.etDescriereUrgenta);
         btnRequestAmbulanta = findViewById(R.id.btnRequestAmbulanta);
         btnLogOut = findViewById(R.id.btnLogOut);
+        btnVoiceInput = findViewById(R.id.btnVoiceInput);
+
+        btnVoiceInput.setOnClickListener(v -> {
+            Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+            intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Descrieți simptomele...");
+            try { voiceLauncher.launch(intent); }
+            catch (Exception e) { Toast.makeText(this, "Microfon indisponibil.", Toast.LENGTH_SHORT).show(); }
+        });
 
         btnRequestAmbulanta.setOnClickListener(v -> {
             textDescriereTemp = etDescriereUrgenta.getText().toString().trim();
@@ -103,7 +132,6 @@ public class PacientActivity extends AppCompatActivity {
                 Toast.makeText(this, "Descrieți urgența!", Toast.LENGTH_SHORT).show();
                 return;
             }
-
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 cererePermisiuniGPS.launch(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION});
             } else {
@@ -121,23 +149,15 @@ public class PacientActivity extends AppCompatActivity {
     private void obtineLocatiaSiProceseazaUrgente(String descriere) {
         btnRequestAmbulanta.setEnabled(false);
         btnRequestAmbulanta.setText("Calculare distanță...");
-
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         try {
             Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
             if (location == null) location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
             if (location != null) {
-                userLat = location.getLatitude();
-                userLon = location.getLongitude();
-                Location spital = new Location("");
-                spital.setLatitude(47.165); spital.setLongitude(27.582);
-                float distantaKm = location.distanceTo(spital) / 1000;
-                etaMinute = (int) distantaKm + 3;
-                if (etaMinute < 3) etaMinute = 3;
+                userLat = location.getLatitude(); userLon = location.getLongitude();
+                etaMinute = 1;
             }
         } catch (SecurityException e) { e.printStackTrace(); }
-
         pornesteFluxAI(descriere);
     }
 
@@ -149,7 +169,7 @@ public class PacientActivity extends AppCompatActivity {
             String rezultatGemini = cereSimptomeDeLaGemini(descriere);
             handler.post(() -> {
                 if (rezultatGemini.startsWith("EROARE")) {
-                    salveazaUrgenta(descriere, "Eroare AI", "Triaj Manual", 1);
+                    salveazaUrgenta(descriere, rezultatGemini, "Triaj Manual", 2, "Pacient", "Fără istoric");
                 } else {
                     List<String> simptome = Arrays.asList(rezultatGemini.split("\\s*,\\s*"));
                     executaTriajMatematic(descriere, simptome);
@@ -172,7 +192,8 @@ public class PacientActivity extends AppCompatActivity {
             contentsArray.put(contentObj);
             jsonBody.put("contents", contentsArray);
 
-            URL url = new URL("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + API_KEY);
+            String cleanApiKey = API_KEY.trim();
+            URL url = new URL("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + cleanApiKey);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
@@ -188,29 +209,58 @@ public class PacientActivity extends AppCompatActivity {
                 scanner.close();
                 return new JSONObject(responseStr).getJSONArray("candidates").getJSONObject(0).getJSONObject("content").getJSONArray("parts").getJSONObject(0).getString("text").trim();
             }
-            return "EROARE_API";
-        } catch (Exception e) { return "EROARE_SISTEM"; }
+            return "EROARE_API: " + conn.getResponseCode();
+        } catch (Exception e) { return "EROARE_SISTEM: " + e.getMessage(); }
     }
 
     private void executaTriajMatematic(String descriere, List<String> simptomePacient) {
-        db.collection("Afectiuni").get().addOnSuccessListener(querySnapshots -> {
-            Afectiune topBoala = null;
-            double maxScor = -1.0;
-            for (QueryDocumentSnapshot doc : querySnapshots) {
-                Afectiune boala = doc.toObject(Afectiune.class);
-                boala.id = doc.getId();
-                double scor = TriageEngine.calculeazaScor(boala, simptomePacient);
-                if (scor > maxScor) { maxScor = scor; topBoala = boala; }
+        String uid = mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getUid() : "anonim";
+
+        db.collection("Users").document(uid).get().addOnSuccessListener(userDoc -> {
+            List<String> istoricMedical = null;
+            String numePacient = "Pacient Necunoscut";
+            String istoricPentruMedic = "Fără antecedente medicale declarate.";
+
+            if (userDoc.exists()) {
+                if (userDoc.contains("nume")) {
+                    numePacient = userDoc.getString("nume");
+                } else if (userDoc.contains("email")) {
+                    numePacient = userDoc.getString("email");
+                }
+
+                if (userDoc.contains("istoric_medical")) {
+                    istoricMedical = (List<String>) userDoc.get("istoric_medical");
+                    if (istoricMedical != null && !istoricMedical.isEmpty()) {
+                        istoricPentruMedic = android.text.TextUtils.join(", ", istoricMedical);
+                    }
+                }
             }
-            if (topBoala != null && maxScor > 0) {
-                salveazaUrgenta(descriere, topBoala.nume, topBoala.departament, (int) topBoala.prioritate);
-            } else {
-                salveazaUrgenta(descriere, "Indisponibil", "Triaj General", 2);
-            }
+
+            final List<String> finalIstoric = istoricMedical;
+            final String finalNume = numePacient;
+            final String finalIstoricText = istoricPentruMedic;
+
+            db.collection("Afectiuni").get().addOnSuccessListener(querySnapshots -> {
+                Afectiune topBoala = null;
+                double maxScor = -1.0;
+                for (QueryDocumentSnapshot doc : querySnapshots) {
+                    Afectiune boala = doc.toObject(Afectiune.class);
+                    boala.id = doc.getId();
+
+                    double scor = TriageEngine.calculeazaScor(boala, simptomePacient, finalIstoric);
+                    if (scor > maxScor) { maxScor = scor; topBoala = boala; }
+                }
+
+                if (topBoala != null && maxScor > 0.0001) {
+                    salveazaUrgenta(descriere, topBoala.nume, topBoala.departament, (int) topBoala.prioritate, finalNume, finalIstoricText);
+                } else {
+                    salveazaUrgenta(descriere, "Simptome nespecifice", "Triaj General", 4, finalNume, finalIstoricText);
+                }
+            });
         });
     }
 
-    private void salveazaUrgenta(String descriere, String diagnosticAI, String departament, int prioritate) {
+    private void salveazaUrgenta(String descriere, String diagnosticAI, String departament, int prioritate, String numePacient, String istoricText) {
         Map<String, Object> urgenta = new HashMap<>();
         urgenta.put("pacientId", mAuth.getUid());
         urgenta.put("status", "IN_ASTEPTARE");
@@ -222,12 +272,23 @@ public class PacientActivity extends AppCompatActivity {
         urgenta.put("longitudine", userLon);
         urgenta.put("data_solicitare", new Date());
 
-        db.collection("Urgenti").add(urgenta).addOnSuccessListener(doc -> pornesteAnimatieUrmarire(etaMinute));
+        // DATELE NOI SALVATE PENTRU MEDIC:
+        urgenta.put("descriere", descriere);
+        urgenta.put("nume_pacient", numePacient);
+        urgenta.put("istoric_pacient", istoricText);
+
+        db.collection("Urgenti").add(urgenta).addOnSuccessListener(doc -> {
+            idDocumentCurent = doc.getId();
+            pornesteAnimatieUrmarireDus(etaMinute, departament);
+        });
     }
 
-    private void pornesteAnimatieUrmarire(int minute) {
+    private void pornesteAnimatieUrmarireDus(int minute, String departamentAI) {
         layoutPrincipal.setVisibility(View.GONE);
         layoutAnimatieUrmarire.setVisibility(View.VISIBLE);
+        tvMesajStatus.setText("Ambulanța vine spre tine!");
+        tvCountdown.setTextColor(android.graphics.Color.parseColor("#D32F2F"));
+
         long milisecundeTotale = (long) minute * 60 * 1000;
         new CountDownTimer(milisecundeTotale, 1000) {
             public void onTick(long millisUntilFinished) {
@@ -237,10 +298,68 @@ public class PacientActivity extends AppCompatActivity {
                 progressBarCircular.setProgress((int) (millisUntilFinished * 100 / milisecundeTotale));
             }
             public void onFinish() {
-                tvCountdown.setText("00:00");
-                progressBarCircular.setProgress(0);
-                Toast.makeText(PacientActivity.this, "Ambulanța a sosit!", Toast.LENGTH_LONG).show();
+                Toast.makeText(PacientActivity.this, "Ambulanța a ajuns! Te preluăm...", Toast.LENGTH_SHORT).show();
+                pornesteAnimatieUrmarireIntors(minute, departamentAI);
             }
         }.start();
+    }
+
+    private void pornesteAnimatieUrmarireIntors(int minute, String departamentAI) {
+        tvMesajStatus.setText("Ne îndreptăm spre spital...");
+        tvCountdown.setTextColor(android.graphics.Color.parseColor("#FF9800"));
+
+        long milisecundeTotale = (long) minute * 60 * 1000;
+        new CountDownTimer(milisecundeTotale, 1000) {
+            public void onTick(long millisUntilFinished) {
+                int min = (int) (millisUntilFinished / 1000) / 60;
+                int sec = (int) (millisUntilFinished / 1000) % 60;
+                tvCountdown.setText(String.format("%02d:%02d", min, sec));
+                progressBarCircular.setProgress((int) (millisUntilFinished * 100 / milisecundeTotale));
+            }
+            public void onFinish() {
+                tvMesajStatus.setText("Am ajuns. Se alocă resursele...");
+                alocaResurseSiInterneaza(departamentAI);
+            }
+        }.start();
+    }
+
+    private void alocaResurseSiInterneaza(String departamentAI) {
+        db.collection("Sali").whereEqualTo("departament", departamentAI).whereEqualTo("este_libera", true)
+                .limit(1).get().addOnSuccessListener(sali -> {
+
+                    String numeSala = "Fără sală alocată (Hol)";
+                    if (!sali.isEmpty()) {
+                        QueryDocumentSnapshot docSala = (QueryDocumentSnapshot) sali.getDocuments().get(0);
+                        numeSala = docSala.getString("nume");
+                        db.collection("Sali").document(docSala.getId()).update("este_libera", false);
+                    }
+                    final String finalNumeSala = numeSala;
+
+                    db.collection("Medici").whereEqualTo("specializare", departamentAI).whereEqualTo("este_liber", true)
+                            .limit(1).get().addOnSuccessListener(medici -> {
+
+                                String numeMedic = "Medic indisponibil";
+                                if (!medici.isEmpty()) {
+                                    QueryDocumentSnapshot docMedic = (QueryDocumentSnapshot) medici.getDocuments().get(0);
+                                    numeMedic = docMedic.getString("nume");
+                                    db.collection("Medici").document(docMedic.getId()).update("este_liber", false);
+                                }
+
+                                Map<String, Object> updateSpital = new HashMap<>();
+                                updateSpital.put("status", "IN_SPITAL");
+                                updateSpital.put("sala_alocata", finalNumeSala);
+                                updateSpital.put("medic_alocat", numeMedic);
+
+                                db.collection("Urgenti").document(idDocumentCurent).update(updateSpital)
+                                        .addOnSuccessListener(aVoid -> {
+                                            Toast.makeText(PacientActivity.this, "Ai fost internat în " + finalNumeSala, Toast.LENGTH_LONG).show();
+                                            layoutAnimatieUrmarire.setVisibility(View.GONE);
+                                            layoutPrincipal.setVisibility(View.VISIBLE);
+                                            etDescriereUrgenta.setText("");
+                                            btnRequestAmbulanta.setText("🚨 SOLICITĂ AMBULANȚĂ (GPS)");
+                                            btnRequestAmbulanta.setEnabled(true);
+                                        });
+                            });
+                });
     }
 }

@@ -22,7 +22,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class SignInActivity extends AppCompatActivity {
@@ -122,12 +125,33 @@ public class SignInActivity extends AppCompatActivity {
     private void salveazaDateInFirestore(String userId, String email) {
         Map<String, Object> userData = new HashMap<>();
         userData.put("email", email);
-        userData.put("cnp", etCNP.getText().toString().trim());
-        userData.put("varsta", etVarsta.getText().toString().trim());
-        userData.put("grupa_sange", etGrupaSange.getText().toString().trim());
-        userData.put("alergii", etAlergii.getText().toString().trim());
-        userData.put("boli_cronice", etBoli.getText().toString().trim());
-        userData.put("medicamente", etMedicamente.getText().toString().trim());
+
+        // Preluăm textele din câmpuri
+        String cnp = etCNP.getText().toString().trim();
+        String varsta = etVarsta.getText().toString().trim();
+        String grupaSange = etGrupaSange.getText().toString().trim();
+        String boliText = etBoli.getText().toString().trim();
+        String alergiiText = etAlergii.getText().toString().trim();
+        String medicamente = etMedicamente.getText().toString().trim();
+
+        userData.put("cnp", cnp);
+        userData.put("varsta", varsta);
+        userData.put("grupa_sange", grupaSange);
+        userData.put("boli_cronice", boliText);
+        userData.put("alergii", alergiiText);
+        userData.put("medicamente", medicamente);
+
+        // ⚠️ AICI E REZOLVAREA PENTRU AI-UL TĂU ⚠️
+        // Transformăm ce a scris omul la boli și alergii într-o listă pentru Naive Bayes
+        List<String> istoricMedical = new ArrayList<>();
+        if (!boliText.isEmpty()) {
+            istoricMedical.addAll(Arrays.asList(boliText.split("\\s*,\\s*")));
+        }
+        if (!alergiiText.isEmpty()) {
+            istoricMedical.addAll(Arrays.asList(alergiiText.split("\\s*,\\s*")));
+        }
+        // Salvăm lista sub numele exact pe care îl caută motorul de triaj
+        userData.put("istoric_medical", istoricMedical);
 
         if (rbPacient.isChecked()) {
             userData.put("tip_utilizator", "pacient");
@@ -142,10 +166,7 @@ public class SignInActivity extends AppCompatActivity {
 
         db.collection("Users").document(userId).set(userData)
                 .addOnSuccessListener(aVoid -> {
-                    // --- DIAGNOSTIC ---
-                    String activeProject = FirebaseApp.getInstance().getOptions().getProjectId();
-                    Toast.makeText(SignInActivity.this, "TRIMIS ÎN PROIECTUL: " + activeProject, Toast.LENGTH_LONG).show();
-
+                    Toast.makeText(SignInActivity.this, "Cont creat cu succes!", Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(SignInActivity.this, LoginActivity.class));
                     finish();
                 })

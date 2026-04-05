@@ -51,7 +51,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:layout_marginEnd="2dp"
-            android:text="🏥 ÎN UNITATE"
+            android:text="🏥 ÎN SPITAL"
             android:textSize="13sp"
             android:textStyle="bold"
             app:backgroundTint="#4CAF50"
@@ -64,7 +64,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:layout_marginStart="2dp"
-            android:text="🚑 ALERTE EXTERNE"
+            android:text="🚑 ÎN PROCESARE"
             android:textSize="13sp"
             android:textStyle="bold"
             app:backgroundTint="#26000000"
@@ -73,100 +73,44 @@
             app:strokeWidth="2dp" />
     </LinearLayout>
 
-    <ScrollView
-        android:id="@+id/layoutInSpital"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/tabContainer"
-        android:layout_above="@+id/btnLogOutMedic"
-        android:scrollbars="none"
-        android:visibility="visible">
+        android:layout_above="@+id/btnLogOutMedic">
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cardPacient1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="14dp"
-                app:cardBackgroundColor="#59FF3B30"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🔴 URGENȚĂ GRAD 0" android:textColor="#FFFFFF" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ion Popescu (54 ani)" android:textColor="#FFFFFF" android:textSize="22sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="SALA 1 (Resuscitare)" android:textColor="#FFFFFF" android:textStyle="bold" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cardPacient2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="14dp"
-                app:cardBackgroundColor="#26000000"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:strokeColor="#FFEB3B"
-                app:strokeWidth="2dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🟡 COD GALBEN - 15 MIN" android:textColor="#FFEB3B" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Maria Ionescu (32 ani)" android:textColor="#FFFFFF" android:textSize="20sp" android:textStyle="bold" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cardPacient3"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="14dp"
-                app:cardBackgroundColor="#26000000"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:strokeColor="#00D2FF"
-                app:strokeWidth="2dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🔵 COD ALBASTRU - 60 MIN" android:textColor="#00D2FF" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Elena Popa (45 ani)" android:textColor="#FFFFFF" android:textSize="20sp" android:textStyle="bold" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-        </LinearLayout>
-    </ScrollView>
-
-    <LinearLayout
-        android:id="@+id/layoutInProcesare"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/tabContainer"
-        android:layout_above="@+id/btnLogOutMedic"
-        android:orientation="vertical"
-        android:visibility="gone">
-
-        <ListView
-            android:id="@+id/lvAlerteNoi"
+            android:id="@+id/layoutInSpital"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:divider="#40FFFFFF"
-            android:dividerHeight="1dp" />
-    </LinearLayout>
+            android:orientation="vertical"
+            android:visibility="visible">
+
+            <ListView
+                android:id="@+id/lvPacientiInSpital"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:divider="#40FFFFFF"
+                android:dividerHeight="8dp"
+                android:scrollbars="none"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layoutInProcesare"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <ListView
+                android:id="@+id/lvAlerteNoi"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:divider="#40FFFFFF"
+                android:dividerHeight="8dp"
+                android:scrollbars="none"/>
+        </LinearLayout>
+    </FrameLayout>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnLogOutMedic"

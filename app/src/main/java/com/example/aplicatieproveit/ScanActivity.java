@@ -47,7 +47,7 @@ public class ScanActivity extends AppCompatActivity {
     private TextView tvStatusAI, tvRezultatScanare;
     private Bitmap pozaBuletin;
 
-    private final String API_KEY = BuildConfig.API_KEY;
+    private final String API_KEY = "AIzaSyA-kYpwcZmNeNrdxDqxMnUrozbaj68kw7E";
 
     // --- INSTANȚIEM BAZA DE DATE ---
     private DB_functions db = new DB_functions();

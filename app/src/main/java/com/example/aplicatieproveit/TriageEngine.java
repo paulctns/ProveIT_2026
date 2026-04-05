@@ -5,31 +5,34 @@ import java.util.Map;
 
 public class TriageEngine {
 
-    // Funcția matematică bazată pe Naive Bayes
-    public static double calculeazaScor(Afectiune boala, List<String> simptomePacient) {
-
-        // 1. Pornim cu probabilitatea de bază a bolii P(Boală)
+    public static double calculeazaScor(Afectiune boala, List<String> simptomePacient, List<String> istoricMedical) {
+        // Pornim cu probabilitatea de bază a bolii
         double scor = boala.probabilitate_generala;
 
-        // Protecție în caz că boala nu are simptome trecute
         if (boala.simptome == null) return 0.0;
 
-        // 2. Trecem prin TOATE simptomele pe care le cunoaște această boală
+        int simptomeGasite = 0;
+
         for (Map.Entry<String, Double> entry : boala.simptome.entrySet()) {
-            String simptomDinBazaDeDate = entry.getKey();
+            String sBaza = entry.getKey();
             double pondere = entry.getValue();
 
-            // 3. Verificăm dacă pacientul ARE acest simptom
-            if (simptomePacient.contains(simptomDinBazaDeDate)) {
-                // Dacă îl are, înmulțim scorul cu ponderea simptomului P(Simptom|Boală)
-                scor = scor * pondere;
+            // Aplicăm boost pentru istoric medical
+            if (istoricMedical != null && istoricMedical.contains(sBaza)) {
+                pondere = Math.min(0.99, pondere * 1.3);
+            }
+
+            if (simptomePacient.contains(sBaza)) {
+                // Dacă simptomul se potrivește, scorul crește
+                scor *= (pondere * 10);
+                simptomeGasite++;
             } else {
-                // Dacă NU îl are, penalizăm scorul înmulțind cu inversul ponderii (1 - P)
-                scor = scor * (1.0 - pondere);
+                // Penalizare blândă pentru simptome lipsă
+                scor *= 0.8;
             }
         }
 
-        // Returnăm scorul final (matematic)
-        return scor;
+        // Dacă nu am găsit niciun simptom care să aparțină bolii, scorul e 0
+        return (simptomeGasite > 0) ? scor : 0.0;
     }
 }

@@ -2,13 +2,16 @@ package com.example.aplicatieproveit;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ScrollView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -27,22 +30,19 @@ import java.util.ArrayList;
 
 public class MedicActivity extends AppCompatActivity {
 
-    // Tab-uri și Layouts
     private Button btnTabSpital, btnTabAsteptare;
     private ScrollView layoutInSpital;
     private View layoutInProcesare;
 
-    // Elementele pentru In Spital
     private CardView cardPacient1, cardPacient2, cardPacient3;
     private Button btnLogOutMedic;
 
-    // Elementele pentru In Procesare
     private ListView lvAlerteNoi;
     private ArrayList<String> listaAlerte;
-    private ArrayList<String> listaDetaliiAlerte; // Ca să știm ce detaliu afișăm la click
+    private ArrayList<String> listaDetaliiComplete;
+    private ArrayList<Long> listaPrioritati; // Păstrăm prioritatea pentru a colora corect rândul
     private ArrayAdapter<String> adapter;
 
-    // Firebase
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
 
@@ -52,7 +52,6 @@ public class MedicActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_medic);
 
-        // Inițializare Firebase
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
@@ -62,52 +61,80 @@ public class MedicActivity extends AppCompatActivity {
             return insets;
         });
 
-        // 1. Mapare UI
+        // Mapare UI
         btnTabSpital = findViewById(R.id.btnTabSpital);
         btnTabAsteptare = findViewById(R.id.btnTabAsteptare);
         layoutInSpital = findViewById(R.id.layoutInSpital);
         layoutInProcesare = findViewById(R.id.layoutInProcesare);
-
         cardPacient1 = findViewById(R.id.cardPacient1);
         cardPacient2 = findViewById(R.id.cardPacient2);
         cardPacient3 = findViewById(R.id.cardPacient3);
-
         lvAlerteNoi = findViewById(R.id.lvAlerteNoi);
         btnLogOutMedic = findViewById(R.id.btnLogOutMedic);
 
-        // 2. Logica de comutare Tab-uri
         btnTabSpital.setOnClickListener(v -> setViewSpital());
         btnTabAsteptare.setOnClickListener(v -> setViewProcesare());
 
-        // 3. Setup pentru Lista Live
         listaAlerte = new ArrayList<>();
-        listaDetaliiAlerte = new ArrayList<>();
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, listaAlerte);
+        listaDetaliiComplete = new ArrayList<>();
+        listaPrioritati = new ArrayList<>();
+
+        // ADAPTOR CUSTOM: Colorează fiecare rând în funcție de lista de priorități
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listaAlerte) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                TextView text = view.findViewById(android.R.id.text1);
+
+                // Pentru a arăta mai bine, facem textul un pic mai îngroșat și îi dăm padding
+                text.setTypeface(null, android.graphics.Typeface.BOLD);
+                view.setPadding(30, 40, 30, 40);
+
+                long prioritate = listaPrioritati.get(position);
+
+                // Setăm fundalurile și culorile textului pe coduri de triaj
+                if (prioritate == 1) { // ROȘU
+                    view.setBackgroundColor(Color.parseColor("#FFCDD2")); // Roșu pastel
+                    text.setTextColor(Color.parseColor("#B71C1C")); // Roșu închis
+                } else if (prioritate == 2) { // GALBEN
+                    view.setBackgroundColor(Color.parseColor("#FFF9C4")); // Galben pastel
+                    text.setTextColor(Color.parseColor("#F57F17")); // Portocaliu închis
+                } else if (prioritate == 3) { // VERDE
+                    view.setBackgroundColor(Color.parseColor("#C8E6C9")); // Verde pastel
+                    text.setTextColor(Color.parseColor("#1B5E20")); // Verde închis
+                } else if (prioritate == 4) { // ALBASTRU
+                    view.setBackgroundColor(Color.parseColor("#BBDEFB")); // Albastru pastel
+                    text.setTextColor(Color.parseColor("#0D47A1")); // Albastru închis
+                } else {
+                    view.setBackgroundColor(Color.parseColor("#F5F5F5")); // Gri standard
+                    text.setTextColor(Color.parseColor("#333333"));
+                }
+
+                return view;
+            }
+        };
+
         lvAlerteNoi.setAdapter(adapter);
 
-        // Când medicul dă click pe o alertă nouă din listă
+        // Click pe o alertă din listă pentru detalii complete
         lvAlerteNoi.setOnItemClickListener((parent, view, position, id) -> {
-            arataDosarPacient("URGENȚĂ ÎN AȘTEPTARE", listaDetaliiAlerte.get(position), "CNP Nespecificat. Așteaptă decizie AI.");
+            String detalii = listaDetaliiComplete.get(position);
+            arataDosarPacient("DETALII URGENȚĂ LIVE", detalii, "Calculat prin A.I. Naive Bayes Classifier");
         });
 
-        // 4. Acțiuni pentru Cardurile Statice (În Spital)
-        cardPacient1.setOnClickListener(v -> arataDosarPacient("Ion Popescu", "Dureri piept, risc infarct.", "Grupa A, Alergic la Penicilină"));
-        cardPacient2.setOnClickListener(v -> arataDosarPacient("Maria Ionescu", "Tăietură adâncă braț.", "Grupa 0, Fără alergii"));
-        cardPacient3.setOnClickListener(v -> arataDosarPacient("Elena Popa", "Dificultăți respiratorii.", "Grupa B, Astm bronșic"));
+        // Carduri statice (Demo)
+        cardPacient1.setOnClickListener(v -> arataDosarPacient("Ion Popescu", "Risc Infarct", "Cod Roșu - Sala 1"));
+        cardPacient2.setOnClickListener(v -> arataDosarPacient("Maria Ionescu", "Tăietură braț", "Cod Galben - Sala 4"));
 
-        // Log Out
         btnLogOutMedic.setOnClickListener(v -> {
             mAuth.signOut();
-            Intent intent = new Intent(MedicActivity.this, MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
+            startActivity(new Intent(MedicActivity.this, MainActivity.class));
+            finish();
         });
 
-        // Pornim receptorul de Firebase
         ascultaDupaUrgenteNoi();
     }
 
-    // Funcții pentru schimbarea Tab-urilor
     private void setViewSpital() {
         layoutInSpital.setVisibility(View.VISIBLE);
         layoutInProcesare.setVisibility(View.GONE);
@@ -122,45 +149,52 @@ public class MedicActivity extends AppCompatActivity {
         btnTabAsteptare.setAlpha(1.0f);
     }
 
-    // Funcția care aduce datele Live din Firebase
     private void ascultaDupaUrgenteNoi() {
         db.collection("Urgenti")
                 .orderBy("data_solicitare", Query.Direction.DESCENDING)
                 .addSnapshotListener((value, error) -> {
-                    if (error != null) {
-                        Log.e("FIREBASE", "Eroare: " + error.getMessage());
-                        return;
-                    }
+                    if (error != null) return;
 
                     if (value != null) {
                         listaAlerte.clear();
-                        listaDetaliiAlerte.clear();
+                        listaDetaliiComplete.clear();
+                        listaPrioritati.clear();
 
                         for (QueryDocumentSnapshot doc : value) {
-                            String descriere = doc.getString("descriere");
-                            String status = doc.getString("status");
+                            String diagnostic = doc.getString("diagnostic_ai");
+                            String departament = doc.getString("departament_ai");
+                            String descriereSimpla = doc.getString("descriere");
 
-                            // Textul care apare pe rând în listă
-                            String titluScurt = "🚨 PACIENT NOU - Status: " + status;
+                            // Ne asigurăm că dacă nu există prioritate (urgențe vechi), o punem default pe 4
+                            long prioritate = doc.contains("prioritate") && doc.get("prioritate") != null
+                                    ? doc.getLong("prioritate") : 4;
 
-                            listaAlerte.add(titluScurt);
-                            listaDetaliiAlerte.add(descriere); // Salvăm descrierea ca să o arătăm la click
+                            // Nu mai punem emoji, punem direct textul clar
+                            String titluLista = diagnostic != null ? diagnostic.toUpperCase() + " (" + departament + ")" : "Urgență Necunoscută";
+
+                            String detaliiPopUp = "SIMPTOME PACIENT:\n" + descriereSimpla +
+                                    "\n\nDIAGNOSTIC A.I.: " + diagnostic +
+                                    "\nDEPARTAMENT RECOMANDAT: " + departament +
+                                    "\nNIVEL URGENȚĂ (1-4): " + prioritate;
+
+                            listaAlerte.add(titluLista);
+                            listaDetaliiComplete.add(detaliiPopUp);
+                            listaPrioritati.add(prioritate); // Salvăm prioritatea pentru a ști ce culoare dăm rândului
                         }
                         adapter.notifyDataSetChanged();
                     }
                 });
     }
 
-    // Funcția pentru Pop-up
     private void arataDosarPacient(String nume, String diagnosticAI, String istoricMedical) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Dosar: " + nume);
-
-        String mesajComplet = "📋 REZUMAT SIMPTOME:\n" + diagnosticAI + "\n\n" +
-                "📂 DATE SISTEM:\n" + istoricMedical;
-
-        builder.setMessage(mesajComplet);
-        builder.setPositiveButton("Închide", (dialog, which) -> dialog.dismiss());
+        builder.setTitle(nume);
+        builder.setMessage(diagnosticAI + "\n\n📂 INFO SISTEM:\n" + istoricMedical);
+        builder.setPositiveButton("ÎNREGISTREAZĂ ÎN SPITAL", (dialog, which) -> {
+            // Aici va veni codul pentru Opțiunea 2 (Alocare Sală și Medic)
+            Toast.makeText(this, "Funcție în lucru pentru alocare sală...", Toast.LENGTH_SHORT).show();
+        });
+        builder.setNegativeButton("Închide", (dialog, which) -> dialog.dismiss());
         builder.show();
     }
 }

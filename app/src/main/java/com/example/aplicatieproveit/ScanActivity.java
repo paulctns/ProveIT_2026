@@ -210,7 +210,8 @@ public class ScanActivity extends AppCompatActivity {
             contentsArray.put(contentObj);
             jsonBody.put("contents", contentsArray);
 
-            URL url = new URL("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + API_KEY);
+            // Am schimbat în gemini-2.5-flash
+            URL url = new URL("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + API_KEY);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
